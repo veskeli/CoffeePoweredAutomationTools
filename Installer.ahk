@@ -1,3 +1,5 @@
+;TODO
+;Install as exe, Shortcut to desktop, Change location and Handle Cancel
 #SingleInstance, Force
 SetBatchLines, -1
 ListLines, Off
@@ -33,12 +35,12 @@ Gui Add, Text, x8 y0 w293 h23 +0x200, Coffee Powered Automation Tools
 Gui Font
 Gui Font, s9, Segoe UI
 Gui Add, Progress, x8 y24 w295 h20 -Smooth vInstallBar, 0
-Gui Add, Radio, x8 y48 w45 h23 +Checked vInstallAsAhk, AHK
-Gui Add, Radio, x56 y48 w42 h23 vInstallAsExe, EXE
-Gui Add, Edit, x8 y72 w259 h21 vLocation, % AppFolder
-Gui Add, Button, x272 y72 w24 h23 vChangeLocation, ...
+Gui Add, Radio, x8 y48 w45 h23 +Checked vInstallAsAhk +Disabled, AHK
+Gui Add, Radio, x56 y48 w42 h23 vInstallAsExe +Disabled, EXE
+Gui Add, Edit, x8 y72 w259 h21 vLocation +Disabled, % AppFolder
+Gui Add, Button, x272 y72 w24 h23 vChangeLocation +Disabled, ...
 Gui Add, Button, x8 y104 w80 h23 vInstallScriptButton gInstallScript, Install
-Gui Add, CheckBox, x96 y104 w120 h23 vShortCutToDesktop, Shortcut to desktop
+Gui Add, CheckBox, x96 y104 w120 h23 vShortCutToDesktop +Disabled, Shortcut to desktop
 Gui Add, Button, x224 y104 w80 h23 gCancelInstall, Cancel
 Gui Font, s8
 Gui Add, Text, x104 y48 w201 h23 +0x200, [Exe can be pinned and contains icon]
@@ -132,10 +134,10 @@ SetProgressBarState(State)
 }
 SetControlState(State)
 {
-    GuiControl, %State%,ShortCutToDesktop
-    GuiControl, %State%,InstallAsAhk
-    GuiControl, %State%,InstallAsExe
-    GuiControl, %State%,Location
+    ;GuiControl, %State%,ShortCutToDesktop
+    ;GuiControl, %State%,InstallAsAhk
+    ;GuiControl, %State%,InstallAsExe
+    ;GuiControl, %State%,Location
     GuiControl, %State%,ChangeLocation
     GuiControl, %State%,InstallScriptButton
 }
