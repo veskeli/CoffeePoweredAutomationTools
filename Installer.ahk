@@ -5,44 +5,21 @@ SetWorkingDir, %A_ScriptDir%
 SplitPath, A_ScriptName, , , , GameScripts
 #Persistent
 ;____________________________________________________________
-;//////////////[Installer]///////////////
+;//////////////[Installer Variables]///////////////
 InstallerVersion = 0.3
 global InstallerVersion
+;//////////////[Links]///////////////
 VersionUrlGithub := % "https://raw.githubusercontent.com/veskeli/GameScriptsByVeskeli/"
 AppGithubDownloadURL := % "https://raw.githubusercontent.com/veskeli/GameScriptsByVeskeli/main/GameScripts.ahk"
-;Braches [main] [Experimental] [PreRelease]
-;____________________________________________________________
 ;//////////////[Folders]///////////////
 ScriptName = CoffeeTools
 AppFolderName = CoffeePoweredAutomationTools
 AppFolder = %A_AppData%\%AppFolderName%
 AppSettingsFolder = %AppFolder%\Settings
-AppUpdaterFile = %AppFolder%\Updater.ahk
-GuiPictureFolder = %AppFolder%\Gui
-MainScriptFile = %AppFolder%\%ScriptName%
 MainScriptAhkFile = %AppFolder%\%ScriptName%.ahk
-AppUpdaterSettingsFile = %AppFolder%\UpdaterInfo.ini
-AppVersionSettingsFile = %AppFolder%\VersionInfo.ini
-AppScriptTempFile = %A_ScriptDir%\GameSciptTemp.ini
 DownloadLocation = % A_ScriptDir . "\" . ScriptName . ".ahk"
-;//////////////[Other Scripts]///////////////
-AppGamingScriptsFolder = %AppFolder%\GamingScripts
-AppOtherScriptsFolder = %AppFolder%\OtherScripts
 ;//////////////[ini]///////////////
 AppSettingsIni = %AppSettingsFolder%\Settings.ini
-AppGameScriptSettingsIni = %AppSettingsFolder%\GameScriptSettings.ini
-AppHotkeysIni = %AppSettingsFolder%\Hotkeys.ini
-AppVersionIdListIni = %AppFolder%\temp\VersionIdList.ini
-AppPreVersionsIni = %AppFolder%\temp\PreVersions.ini
-AppOtherScriptsIni = %AppOtherScriptsFolder%\OtherScripts.ini
-;//////////////[Update]///////////////
-AppUpdateFile = %AppFolder%\temp\OldFile.ahk
-;//////////////[Script Dir]///////////////
-ScriptFullPath =
-T_SkipShortcut = false
-FixUserLocation = false
-ShortcutState = 1
-AppInstallLocation =
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Gui]///////////////
