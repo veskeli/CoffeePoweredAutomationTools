@@ -1,2 +1,2 @@
 # CoffeePoweredAutomationTools
-Coffee Powered Automation Tools [CPAT] (Rewritten "Game Scripts By Veskeli")
+Coffee Powered Automation Tools [CoffeeTools] (Rewritten "Game Scripts By Veskeli")
