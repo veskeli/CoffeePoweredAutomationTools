@@ -11,6 +11,8 @@ global UpdaterVersion
 VersionUrlGithub := % "https://raw.githubusercontent.com/veskeli/GameScriptsByVeskeli/"
 AppGithubDownloadURL := % "https://raw.githubusercontent.com/veskeli/GameScriptsByVeskeli/main/GameScripts.ahk"
 ;Braches [main] [Experimental] [PreRelease]
+ProgressBarVisible := False
+global ProgressBarVisible
 ;____________________________________________________________
 ;//////////////[Folders]///////////////
 ScriptName = GameScripts
@@ -44,16 +46,37 @@ ShortcutState = 1
 AppInstallLocation =
 ;____________________________________________________________
 ;____________________________________________________________
+;//////////////[Progress Bar]///////////////
+Gui 2:Font, s9, Segoe UI
+Gui 2:Add, Text, x8 y2 w217 h43, Updating
+Gui 2:Add, Progress, vDownloadProgressBar x8 y48 w215 h20 -Smooth, 33
+Gui 2:Add, Button, +Disabled x144 y72 w80 h23, Cancel
+;____________________________________________________________
+;____________________________________________________________
 ;//////////////[Update Script]///////////////
-iniread,version,%AppUpdaterSettingsFile%,Options,Version
-iniread,MainScriptFile,%AppUpdaterSettingsFile%,Options,ScriptFullPath
-iniread,MainScriptBranch,%AppUpdaterSettingsFile%,Options,Branch
-global version
-global MainScriptFile
-global MainScriptBranch
-FileDelete,%AppUpdaterSettingsFile%
+IfExist, %AppUpdaterSettingsFile%
+{
+    iniread,version,%AppUpdaterSettingsFile%,Options,Version
+    iniread,MainScriptFile,%AppUpdaterSettingsFile%,Options,ScriptFullPath
+    iniread,MainScriptBranch,%AppUpdaterSettingsFile%,Options,Branch
+    global version
+    global MainScriptFile
+    global MainScriptBranch
+    FileDelete,%AppUpdaterSettingsFile%
 
-UpdateScript(true,MainScriptBranch)
+    UpdateScript(true,MainScriptBranch)
+}
+Else
+{
+    MsgBox,, Updater,No pending updates...,25
+    /*
+    MsgBox, 4, Updater, No pending updates. Would you like to reinstall script?
+    IfMsgBox Yes
+    {
+        UpdateScript(true,MainScriptBranch)
+    }
+    */
+}
 CheckForUpdaterUpdates()
 ExitApp
 ;____________________________________________________________
@@ -163,19 +186,25 @@ ForceUpdate(newversion,T_Branch)
     ;Save branch
     IniWrite, %T_Branch%,%AppSettingsIni%,Branch,Instance1
     ;Download update
-    SplashTextOn, 250,50,Downloading...,Downloading new version.`nVersion: %newversion%
+    ;SplashTextOn, 250,50,Downloading...,Downloading new version.`nVersion: %newversion%
+    SetProgressBarState(5)
     FileDelete, %MainScriptFile%
+    SetProgressBarState(50)
     DownloadLink := % VersionUrlGithub . T_Branch . "/GameScripts.ahk"
+    SetProgressBarState(95)
     UrlDownloadToFile, %DownloadLink%, %MainScriptFile%
-    SplashTextOff
+    ;SplashTextOff
+    SetProgressBarState(100)
     loop
     {
         if (FileExist(MainScriptAhkFile))
         {
             Run, %MainScriptAhkFile%
+            SetProgressBarState(-1) ;Just in case of idk
             ExitApp
         }
     }
+    SetProgressBarState(-1) ;Just in case of idk
     ExitApp
 }
 CheckForUpdaterUpdates()
@@ -217,6 +246,38 @@ ForceUpdateUpdater(newversion)
     DownloadLink := % VersionUrlGithub . MainScriptBranch . "/Updater.ahk"
     UrlDownloadToFile, %DownloadLink%, %A_ScriptFullPath%
     ExitApp
+}
+SetProgressBarState(State) ;Disable by setting "-1"
+{
+    if(State == -1)
+    {
+        OpenProgressWindow(False)
+        ProgressBarVisible := False
+    }
+    Else
+    {
+        if(!ProgressBarVisible)
+        {
+            OpenProgressWindow(True)
+            GuiControl,2:,DownloadProgressBar,%State%
+            ProgressBarVisible := True
+        }
+        Else
+        {
+            GuiControl,2:,DownloadProgressBar,%State%
+        }
+    }
+}
+OpenProgressWindow(State)
+{
+    if(State)
+    {
+        Gui 2:Show, w227 h103, Updater
+    }
+    Else
+    {
+        Gui 2:Destroy
+    }
 }
 ;____________________________________________________________
 ;____________________________________________________________
