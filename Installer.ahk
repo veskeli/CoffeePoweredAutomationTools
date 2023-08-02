@@ -8,11 +8,8 @@ SplitPath, A_ScriptName, , , , GameScripts
 #Persistent
 ;____________________________________________________________
 ;//////////////[Installer Variables]///////////////
-InstallerVersion = 0.3
+InstallerVersion = 0.4
 global InstallerVersion
-;//////////////[Links]///////////////
-VersionUrlGithub := % "https://raw.githubusercontent.com/veskeli/GameScriptsByVeskeli/"
-AppGithubDownloadURL := % "https://raw.githubusercontent.com/veskeli/GameScriptsByVeskeli/main/GameScripts.ahk"
 ;//////////////[Folders]///////////////
 ScriptName = CoffeeTools
 AppFolderName = CoffeePoweredAutomationTools
@@ -20,6 +17,11 @@ AppFolder = %A_AppData%\%AppFolderName%
 AppSettingsFolder = %AppFolder%\Settings
 MainScriptAhkFile = %AppFolder%\%ScriptName%.ahk
 DownloadLocation = % A_ScriptDir . "\" . ScriptName . ".ahk"
+UpdaterDownloadLocation = % A_ScriptDir . "\Updater.ahk"
+;//////////////[Links]///////////////
+GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/main/"
+AppGithubDownloadURL := GithubReposityLink ScriptName ".ahk"
+UpdaterGithubDownloadURL := GithubReposityLink "Updater.ahk"
 ;//////////////[ini]///////////////
 AppSettingsIni = %AppSettingsFolder%\Settings.ini
 ;____________________________________________________________
@@ -83,32 +85,39 @@ FileCreateDir,%AppSettingsFolder%
 SetProgressBarState("10")
 try{
     SetProgressBarState("60")
+    ;App
     UrlDownloadToFile, % AppGithubDownloadURL,% AppFolder . "\" . ScriptName . ".ahk"
+    ;Updater
+    UrlDownloadToFile, % UpdaterGithubDownloadURL,% AppFolder . "\Updater.ahk"
 }
 Catch
 {
     Try{
+        ;App
         UrlDownloadToFile, % AppGithubDownloadURL,% DownloadLocation
         FileMove, % DownloadLocation, % AppFolder . "\" . ScriptName . ".ahk"
+        ;Updater
+        UrlDownloadToFile, % UpdaterGithubDownloadURL,% UpdaterDownloadLocation
+        FileMove, % UpdaterDownloadLocation, % AppFolder . "\Updater.ahk"
     }
     Catch{
         if(A_IsAdmin)
-            {
-                MsgBox,,Error,Script is already running as admin`nTry to download Newer or older installer!
-                ExitApp
-            }
-            MsgBox, 4,Install Error, [Main script] URL Download Error `nInstall Can't continue`nWould you like to restart as admin?
-            IfMsgBox Yes
-            {
-                Run *RunAs %A_ScriptFullPath%
-                ExitApp
-            }
-            Else
-            {
-                SetProgressBarState("0")
-                SetControlState("Enable")
-                Return
-            }
+        {
+            MsgBox,,Error,Script is already running as admin`nTry to download Newer or older installer!
+            ExitApp
+        }
+        MsgBox, 4,Install Error, [Main script] URL Download Error `nInstall Can't continue`nWould you like to restart as admin?
+        IfMsgBox Yes
+        {
+            Run *RunAs %A_ScriptFullPath%
+            ExitApp
+        }
+        Else
+        {
+            SetProgressBarState("0")
+            SetControlState("Enable")
+            Return
+        }
     }
 }
 ;Install done
