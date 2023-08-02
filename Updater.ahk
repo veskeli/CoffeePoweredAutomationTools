@@ -6,10 +6,8 @@ SplitPath, A_ScriptName, , , , GameScripts
 #Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion = 0.3
+UpdaterVersion = 0.31
 global UpdaterVersion
-VersionUrlGithub := % "https://raw.githubusercontent.com/veskeli/GameScriptsByVeskeli/"
-AppGithubDownloadURL := % "https://raw.githubusercontent.com/veskeli/GameScriptsByVeskeli/main/GameScripts.ahk"
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
 global ProgressBarVisible
@@ -37,7 +35,11 @@ AppVersionIdListIni = %AppFolder%\temp\VersionIdList.ini
 AppPreVersionsIni = %AppFolder%\temp\PreVersions.ini
 AppOtherScriptsIni = %AppOtherScriptsFolder%\OtherScripts.ini
 ;//////////////[Update]///////////////
-AppUpdateFile = %AppFolder%\temp\OldFile.ahk
+AppUpdateFile = %AppFolder%\temp\Updater.ahk
+;//////////////[Links]///////////////
+GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/main/"
+AppGithubDownloadURL := GithubReposityLink ScriptName ".ahk"
+UpdaterGithubDownloadURL := GithubReposityLink "Updater.ahk"
 ;//////////////[Script Dir]///////////////
 ScriptFullPath =
 T_SkipShortcut = false
@@ -48,7 +50,7 @@ AppInstallLocation =
 ;____________________________________________________________
 ;//////////////[Progress Bar]///////////////
 Gui 2:Font, s9, Segoe UI
-Gui 2:Add, Text, x8 y2 w217 h43, Updating
+Gui 2:Add, Text, x8 y2 w217 h43 vProgressBarText, Updating
 Gui 2:Add, Progress, vDownloadProgressBar x8 y48 w215 h20 -Smooth, 33
 Gui 2:Add, Button, +Disabled x144 y72 w80 h23, Cancel
 ;____________________________________________________________
@@ -64,7 +66,7 @@ IfExist, %AppUpdaterSettingsFile%
     global MainScriptBranch
     FileDelete,%AppUpdaterSettingsFile%
 
-    UpdateScript(true,MainScriptBranch)
+    TryUpdateScript(true,MainScriptBranch)
 }
 Else
 {
@@ -81,12 +83,12 @@ CheckForUpdaterUpdates()
 ExitApp
 ;____________________________________________________________
 ;____________________________________________________________
-;//////////////[Voids]///////////////
-UpdateScript(T_CheckForUpdates,T_Branch)
+;//////////////[Update Main File]///////////////
+TryUpdateScript(T_CheckForUpdates,T_Branch)
 {
     if(T_Branch == "main" or T_Branch == "Experimental" or T_Branch == "PreRelease")  ;Check that branch is correctly typed
     {
-        newversion := GetNewVersion(T_Branch)
+        newversion := GetNewVersion(T_Branch,"/Version/CoffeePoweredAutomationToolsVersion.txt")
         if(newversion == "ERROR")
         {
             MsgBox,,Update ERROR!,New Version Error!`nError while getting new version,15
@@ -111,7 +113,7 @@ UpdateScript(T_CheckForUpdates,T_Branch)
                 MsgBox, 4,Update,%UpdateText%
                 IfMsgBox, Yes
                 {
-                    TForceUpdate(newversion,T_Branch)
+                    StartUpdate(newversion,T_Branch)
                 }
                 Else
                 {
@@ -130,68 +132,34 @@ UpdateScript(T_CheckForUpdates,T_Branch)
         ExitApp
     }
 }
-GetNewVersion(T_Branch)
-{
-    ;Build link
-    VersionLink := % VersionUrlGithub . T_Branch . "/version.txt"
-    ;Get Version Text
-    T_NewVersion := ReadFileFromLink(VersionLink)
-    if(T_NewVersion == "ERROR")
-    {
-        ;msgbox,,No Internet Connection!,No Internet Connection!
-        return
-    }
-    ;Check that not empty or not found
-    if(T_NewVersion != "" and T_NewVersion != "404: Not Found" and T_NewVersion != "500: Internal Server Error" and T_NewVersion != "400: Invalid request")
-    {
-        Return T_NewVersion
-    }
-    else
-    {
-        return "ERROR"
-    }
-}
-ReadFileFromLink(Link)
-{
-    try
-    {
-        whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-        whr.Open("GET", Link, False)
-        whr.Send()
-        whr.WaitForResponse()
-        TResponse := whr.ResponseText
-    }
-    Catch T_Error
-    {
-        return "ERROR"
-    }
-    return TResponse
-}
 ;Activate Download
-TForceUpdate(newversion,T_Branch)
+StartUpdate(newversion,branch)
 {
     ;Check That if script is running
     SetTitleMatchMode, 2
     DetectHiddenWindows, On
-    If WinExist("GameScripts.ahk" . " ahk_class AutoHotkey")
+    If WinExist(ScriptName ".ahk" . " ahk_class AutoHotkey")
     {
         ;Stop Script
         WinClose
     }
     ;Update Script
-    ForceUpdate(newversion,T_Branch)
+    UpdateScript(newversion,branch)
 }
-ForceUpdate(newversion,T_Branch)
+UpdateScript(newversion,branch) ;[TODO] Get correct file based on version (Currently gets latest from github)
 {
     ;Save branch
-    IniWrite, %T_Branch%,%AppSettingsIni%,Branch,Instance1
-    ;Download update
-    ;SplashTextOn, 250,50,Downloading...,Downloading new version.`nVersion: %newversion%
+    IniWrite, %branch%,%AppSettingsIni%,Branch,Instance1
+    ;Set Progressbar
+    SetProgressBarText(Downloading new version: %newversion%)
     SetProgressBarState(5)
+    ;Delete old file
     FileDelete, %MainScriptFile%
     SetProgressBarState(50)
-    DownloadLink := % VersionUrlGithub . T_Branch . "/GameScripts.ahk"
+
+    DownloadLink := % VersionUrlGithub . branch . "/GameScripts.ahk"
     SetProgressBarState(95)
+    ;Download new file
     UrlDownloadToFile, %DownloadLink%, %MainScriptFile%
     ;SplashTextOff
     SetProgressBarState(100)
@@ -199,6 +167,7 @@ ForceUpdate(newversion,T_Branch)
     {
         if (FileExist(MainScriptAhkFile))
         {
+            ;Open New Script
             Run, %MainScriptAhkFile%
             SetProgressBarState(-1) ;Just in case of idk
             ExitApp
@@ -207,46 +176,29 @@ ForceUpdate(newversion,T_Branch)
     SetProgressBarState(-1) ;Just in case of idk
     ExitApp
 }
+;____________________________________________________________
+;//////////////[Updater updates]///////////////
 CheckForUpdaterUpdates()
 {
-    newversion := GetNewUpdaterVersion(MainScriptBranch)
+    newversion := GetNewVersion(MainScriptBranch,"/Version/UpdaterVersion.txt")
     if(newversion == "ERROR")
     {
         ExitApp
     }
     if(newversion > UpdaterVersion)
     {
-        ForceUpdateUpdater(newversion)
+        UpdateUpdater(newversion)
     }
 }
-GetNewUpdaterVersion(T_Branch)
-{
-    ;Build link
-    VersionLink := % VersionUrlGithub . T_Branch . "/UpdaterVersion.txt"
-    ;Get Version Text
-    T_NewVersion := ReadFileFromLink(VersionLink)
-    if(T_NewVersion == "ERROR")
-    {
-        ExitApp
-    }
-    ;Check that not empty or not found
-    if(T_NewVersion != "" and T_NewVersion != "404: Not Found" and T_NewVersion != "500: Internal Server Error")
-    {
-        Return T_NewVersion
-    }
-    else
-    {
-        ExitApp
-    }
-}
-ForceUpdateUpdater(newversion)
+UpdateUpdater(newversion) ;[TODO] Update from correct branch and version
 {
     FileCreateDir, %AppFolder%\temp
-    FileMove, %A_ScriptFullPath%, %AppUpdateFile%
-    DownloadLink := % VersionUrlGithub . MainScriptBranch . "/Updater.ahk"
-    UrlDownloadToFile, %DownloadLink%, %A_ScriptFullPath%
+    FileMove, %A_ScriptFullPath%, %AppUpdateFile%, 1
+    UrlDownloadToFile, %UpdaterGithubDownloadURL%, %A_ScriptFullPath%
     ExitApp
 }
+;____________________________________________________________
+;//////////////[ProgressBar]///////////////
 SetProgressBarState(State) ;Disable by setting "-1"
 {
     if(State == -1)
@@ -277,6 +229,49 @@ OpenProgressWindow(State)
     Else
     {
         Gui 2:Destroy
+    }
+}
+SetProgressBarText(text)
+{
+    GuiControl,2:,ProgressBarText,%text%
+}
+;____________________________________________________________
+;//////////////[Functions]///////////////
+ReadFileFromLink(Link)
+{
+    try
+    {
+        whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", Link, False)
+        whr.Send()
+        whr.WaitForResponse()
+        TResponse := whr.ResponseText
+    }
+    Catch T_Error
+    {
+        return "ERROR"
+    }
+    return TResponse
+}
+GetNewVersion(T_Branch,linkEnd)
+{
+    ;Build link
+    VersionLink := % VersionUrlGithub . T_Branch . linkEnd
+    ;Get Version Text
+    T_NewVersion := ReadFileFromLink(VersionLink)
+    if(T_NewVersion == "ERROR")
+    {
+        ;msgbox,,No Internet Connection!,No Internet Connection!
+        return
+    }
+    ;Check that not empty or not found
+    if(T_NewVersion != "" and T_NewVersion != "404: Not Found" and T_NewVersion != "500: Internal Server Error" and T_NewVersion != "400: Invalid request")
+    {
+        Return T_NewVersion
+    }
+    else
+    {
+        return "ERROR"
     }
 }
 ;____________________________________________________________
