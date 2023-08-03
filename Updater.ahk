@@ -6,7 +6,7 @@ SplitPath, A_ScriptName, , , , GameScripts
 #Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion = 0.33
+UpdaterVersion = 0.34
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -26,7 +26,7 @@ AppSettingsIni = %AppSettingsFolder%\Settings.ini
 AppUpdateFile = %AppFolder%\temp\Updater.ahk
 ShowRunningLatestMessage := True
 ;//////////////[Links]///////////////
-GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/main/"
+GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/"
 ;//////////////[Script Dir]///////////////
 ScriptFullPath =
 T_SkipShortcut = false
@@ -35,6 +35,7 @@ ShortcutState = 1
 AppInstallLocation =
 ;Global
 global ShowRunningLatestMessage
+global GithubReposityLink
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Progress Bar]///////////////
@@ -79,7 +80,7 @@ TryUpdateScript(T_CheckForUpdates,T_Branch)
     if(T_Branch == "main" or T_Branch == "Experimental" or T_Branch == "PreRelease")  ;Check that branch is correctly typed
     {
         newversion := GetNewVersion(T_Branch,"/Version/CoffeePoweredAutomationToolsVersion.txt")
-        if(newversion == "ERROR")
+        if(newversion == "ERROR" or newversion == "")
         {
             MsgBox,,Update ERROR!,New Version Error!`nError while getting new version,15
             return
@@ -107,7 +108,7 @@ TryUpdateScript(T_CheckForUpdates,T_Branch)
                 }
                 Else
                 {
-                    return "ERROR"
+                    return
                 }
             }
             Else
@@ -135,7 +136,7 @@ StartUpdate(newversion,branch)
     ;Check That if script is running
     SetTitleMatchMode, 2
     DetectHiddenWindows, On
-    If WinExist(ScriptName ".ahk" . " ahk_class AutoHotkey")
+    If WinExist(% ScriptName ".ahk", " ahk_class AutoHotkey")
     {
         ;Stop Script
         WinClose
@@ -154,7 +155,7 @@ UpdateScript(newversion,branch) ;[TODO] Get correct file based on version (Curre
     FileDelete, %MainScriptFile%
     SetProgressBarState(50)
 
-    DownloadLink := % VersionUrlGithub . branch . "/GameScripts.ahk"
+    DownloadLink := % GithubReposityLink . branch . "/GameScripts.ahk"
     SetProgressBarState(95)
     ;Download new file
     UrlDownloadToFile, %DownloadLink%, %MainScriptFile%
@@ -191,7 +192,7 @@ UpdateUpdater(newversion) ;[TODO] Update from correct branch and version
 {
     FileCreateDir, %AppFolder%\temp
     FileMove, %A_ScriptFullPath%, %AppUpdateFile%, 1
-    UrlDownloadToFile, % VersionUrlGithub . branch . "/Updater.ahk", %A_ScriptFullPath%
+    UrlDownloadToFile, % GithubReposityLink . branch . "/Updater.ahk", %A_ScriptFullPath%
     ExitApp
 }
 ;____________________________________________________________
@@ -253,7 +254,7 @@ ReadFileFromLink(Link)
 GetNewVersion(T_Branch,linkEnd)
 {
     ;Build link
-    VersionLink := % VersionUrlGithub . T_Branch . linkEnd
+    VersionLink := % GithubReposityLink . T_Branch . linkEnd
     ;Get Version Text
     T_NewVersion := ReadFileFromLink(VersionLink)
     if(T_NewVersion == "ERROR")
