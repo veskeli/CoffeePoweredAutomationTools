@@ -6,7 +6,7 @@ SplitPath, A_ScriptName, , , , GameScripts
 #Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion = 0.34
+UpdaterVersion = 0.35
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -149,13 +149,14 @@ UpdateScript(newversion,branch) ;[TODO] Get correct file based on version (Curre
     ;Save branch
     IniWrite, %branch%,%AppSettingsIni%,Branch,Instance1
     ;Set Progressbar
-    SetProgressBarText("Downloading new version: %newversion%")
+    DownloadText := Downloading new version: %newversion%
+    SetProgressBarText(DownloadText)
     SetProgressBarState(5)
     ;Delete old file
     FileDelete, %MainScriptFile%
     SetProgressBarState(50)
 
-    DownloadLink := % GithubReposityLink . branch . "/GameScripts.ahk"
+    DownloadLink := % GithubReposityLink . branch . "/CoffeeTools.ahk"
     SetProgressBarState(95)
     ;Download new file
     UrlDownloadToFile, %DownloadLink%, %MainScriptFile%
