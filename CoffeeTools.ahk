@@ -1,6 +1,5 @@
 #SingleInstance Force
 KeyHistory(0)
-; REMOVED: SetBatchLines, -1
 ListLines(false)
 SendMode("Input") ; Forces Send and SendRaw to use SendInput buffering for speed.
 SetTitleMatchMode(3) ; A window's title must exactly match WinTitle to be a match.

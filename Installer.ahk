@@ -1,7 +1,6 @@
 ;TODO
 ;Install as exe, Shortcut to desktop, Change location and Handle Cancel
 #SingleInstance Force
-; REMOVED: SetBatchLines, -1
 ListLines(false)
 SetWorkingDir(A_ScriptDir)
 SplitPath(A_ScriptName, , , , &GameScripts)
