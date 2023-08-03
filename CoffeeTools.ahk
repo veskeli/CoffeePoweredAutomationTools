@@ -43,6 +43,7 @@ global Version
 global ScriptName
 global AppUpdaterSettingsFile
 global CurrentScriptBranch
+global AppUpdaterFile
 ;____________________________________________________________
 ;//////////////[Tab Control]///////////////
 IniRead, T_HomeTab, %AppSettingsIni%,Tabs,Home
