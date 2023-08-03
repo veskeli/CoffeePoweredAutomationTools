@@ -6,7 +6,7 @@ SplitPath, A_ScriptName, , , , GameScripts
 #Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion = 0.31
+UpdaterVersion = 0.32
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -24,6 +24,7 @@ AppUpdaterSettingsFile = %AppFolder%\UpdaterInfo.ini
 AppSettingsIni = %AppSettingsFolder%\Settings.ini
 ;//////////////[Update]///////////////
 AppUpdateFile = %AppFolder%\temp\Updater.ahk
+ShowRunningLatestMessage := True
 ;//////////////[Links]///////////////
 GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/main/"
 ;//////////////[Script Dir]///////////////
@@ -32,6 +33,8 @@ T_SkipShortcut = false
 FixUserLocation = false
 ShortcutState = 1
 AppInstallLocation =
+;Global
+global ShowRunningLatestMessage
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Progress Bar]///////////////
@@ -104,6 +107,13 @@ TryUpdateScript(T_CheckForUpdates,T_Branch)
                 Else
                 {
                     return "ERROR"
+                }
+            }
+            Else
+            {
+                if(ShowRunningLatestMessage)
+                {
+                    MsgBox,, Already latest version!, Already latest version!, 25
                 }
             }
         }
