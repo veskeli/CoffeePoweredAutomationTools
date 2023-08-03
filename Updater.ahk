@@ -136,7 +136,7 @@ StartUpdate(newversion,branch)
     ;Check That if script is running
     SetTitleMatchMode, 2
     DetectHiddenWindows, On
-    If WinExist(% ScriptName ".ahk", " ahk_class AutoHotkey")
+    If WinExist("CoffeeTools.ahk" . " ahk_class AutoHotkey")
     {
         ;Stop Script
         WinClose
