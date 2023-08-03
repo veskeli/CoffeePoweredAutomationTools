@@ -15,7 +15,7 @@ SetMouseDelay, -1 ; Remove short delay done automatically after Click and MouseM
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version = 0.01
+Version = 0.011
 VersionTitle = Interface Test
 ScriptName = CoffeeTools
 AppFolderName = CoffeePoweredAutomationTools
@@ -170,7 +170,7 @@ if(Temp_CheckUpdatesOnStartup != "ERROR")
     GuiControl,1:,CheckUpdatesOnStartup,%Temp_CheckUpdatesOnStartup%
 if(Temp_CheckUpdatesOnStartup == 1)
 {
-    CheckForUpdates()
+    CheckForUpdates(False)
 }
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -322,7 +322,7 @@ FileCreateDir, %AppSettingsFolder%
 IniWrite, %CheckUpdatesOnStartup%, %AppSettingsIni%, Updates, CheckOnStartup
 return
 ButtonCheckForUpdates:
-CheckForUpdates()
+CheckForUpdates(True)
 Return
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -379,7 +379,7 @@ NotAdminError(T_CustomMessage = "")
         }
     }
 }
-CheckForUpdates()
+CheckForUpdates(ShowRunningLatestMessage)
 {
     if(!FileExist(AppUpdaterFile))
     {
@@ -392,6 +392,7 @@ CheckForUpdates()
         IniWrite, %Version%,%AppUpdaterSettingsFile%,Options,Version
         IniWrite, %A_ScriptFullPath%,%AppUpdaterSettingsFile%,Options,ScriptFullPath
         IniWrite, %CurrentScriptBranch%,%AppUpdaterSettingsFile%,Options,Branch
+        IniWrite, %ShowRunningLatestMessage%,%AppUpdaterSettingsFile%,Options,ShowRunningLatestMessage
 
         run, %AppUpdaterFile%
     }
