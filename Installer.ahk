@@ -1,5 +1,6 @@
 ;TODO
 ;Install as exe, Shortcut to desktop, Change location and Handle Cancel
+#Requires AutoHotkey v2.0+
 #SingleInstance Force
 ListLines(false)
 SetWorkingDir(A_ScriptDir)

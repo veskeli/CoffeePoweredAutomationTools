@@ -1,3 +1,4 @@
+#Requires AutoHotkey v2.0+
 #SingleInstance Force
 ListLines(false)
 SetWorkingDir(A_ScriptDir)
@@ -5,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.4"
+UpdaterVersion := "0.41"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -206,6 +207,7 @@ UpdateUpdater(newversion) ;[TODO] Update from correct branch and version
 ;//////////////[ProgressBar]///////////////
 SetProgressBarState(State) ;Disable by setting "-1"
 {
+    global ProgressBarVisible
     if(State == -1)
     {
         OpenProgressWindow(False)
