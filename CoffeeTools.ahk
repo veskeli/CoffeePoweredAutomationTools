@@ -13,9 +13,18 @@ SetKeyDelay, -1, -1 ; Remove short delay done automatically after every keystrok
 SetMouseDelay, -1 ; Remove short delay done automatically after Click and MouseMove/Click/Drag
 #Persistent
 ;________________________________________________________________________________________________________________________
+;//////////////[Changelog]///////////////
+Changelog =
+(
+Changelog:
++ Changelog
++ Updated Tile
++ Fixed Settings file
+)
+;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version = 0.011
+Version = 0.12
 VersionTitle = Interface Test
 ScriptName = CoffeeTools
 AppFolderName = CoffeePoweredAutomationTools
@@ -114,9 +123,9 @@ if(SettingsTAB)
     Gui 1:Add, GroupBox, x8 y122 w175 h160, Settings for this script.
     Gui 1:Add, CheckBox, x16 y144 w143 h23 gKeepThisAlwaysOnTop, Keep this always on top
     Gui 1:Add, CheckBox, x16 y168 w140 h23 gOnExitCloseToTray vOnExitCloseToTrayCheckbox, On Exit close to tray
-    ;Gui 1:Add, Button, x16 y192 w133 h28 gRedownloadAssets, Redownload assets
-    ;Gui 1:Add, Button, x16 y224 w133 h23 gShowChangelogButton, Show Changelog
-    ;Gui 1:Add, Button, x16 y252 w133 h23 gCustomizeTabs, Customize Tabs
+    Gui 1:Add, Button, x16 y192 w133 h28 +Disabled, Redownload assets
+    Gui 1:Add, Button, x16 y224 w133 h23 gShowChangelogButton, Show Changelog
+    Gui 1:Add, Button, x16 y252 w133 h23 +Disabled, Customize Tabs
     ;Debug
     Gui 1:Font
     Gui 1:Add, GroupBox, x8 y295 w170 h123, Debug
@@ -175,7 +184,7 @@ if(Temp_CheckUpdatesOnStartup == 1)
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Show Gui]///////////////
-Gui 1:Show, w835 h517, Coffee Tools | %Version% | No Auto Updates!
+Gui 1:Show, w835 h517, Coffee Tools | %Version% | %VersionTitle% | Alpha
 Return
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -287,6 +296,9 @@ else
     IniWrite, false,%AppSettingsIni%,Settings,CloseToTray
 }
 return
+ShowChangelogButton:
+ShowChangelogMsgBox(Changelog)
+Return
 ;Debug
 OpenScriptFolder:
 run, %A_ScriptDir%
@@ -295,7 +307,7 @@ OpenThisInGithub:
 run, % GithubPage
 return
 OpenAppSettingsFolder:
-run, %AppFolder%
+run, %AppSettingsFolder%
 return
 OpenAppSettingsFile:
 run, %AppSettingsIni%
@@ -396,4 +408,7 @@ CheckForUpdates(ShowRunningLatestMessage)
 
         run, %AppUpdaterFile%
     }
+}
+ShowChangelogMsgBox(messageText) {
+    MsgBox,, Changelog [%Version%],%messageText%
 }
