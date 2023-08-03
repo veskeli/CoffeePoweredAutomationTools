@@ -6,7 +6,7 @@ SplitPath, A_ScriptName, , , , GameScripts
 #Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion = 0.32
+UpdaterVersion = 0.33
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -50,6 +50,7 @@ IfExist, %AppUpdaterSettingsFile%
     iniread,version,%AppUpdaterSettingsFile%,Options,Version
     iniread,MainScriptFile,%AppUpdaterSettingsFile%,Options,ScriptFullPath
     iniread,MainScriptBranch,%AppUpdaterSettingsFile%,Options,Branch
+    iniread,ShowRunningLatestMessage,%AppUpdaterSettingsFile%,Options,ShowRunningLatestMessage
     global version
     global MainScriptFile
     global MainScriptBranch
