@@ -16,12 +16,13 @@ Persistent
 Changelog := "
 (
 Changelog:
-AHK v2
++ AHK v2
++ Fixing and enabling settings
 )"
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version := "0.2"
+Version := "0.21"
 VersionTitle := "AHK v2"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -106,11 +107,11 @@ if(HomeTAB)
     ogcButtonStartupfolder.OnEvent("Click", OpenStartupFolder.Bind("Normal"))
     ogcButtonOpenSounds := myGui.Add("Button", "x96 y80 w80 h23", "Open Sounds")
     ogcButtonOpenSounds.OnEvent("Click", OpenSounds.Bind("Normal"))
-    ogcButtonClearWindowsTempFolder := myGui.Add("Button", "x16 y104 w164 h28 +Disabled", "Clear Windows Temp Folder")
+    ogcButtonClearWindowsTempFolder := myGui.Add("Button", "x16 y104 w164 h28", "Clear Windows Temp Folder")
     ogcButtonClearWindowsTempFolder.OnEvent("Click", ClearWindowsTempFolder.Bind("Normal"))
     ;Always on top
-    myGui.SetFont()
-    myGui.Add("GroupBox", "x8 y152 w300 h62", "Toggle any application to Always on top by hotkey")
+    ;myGui.SetFont()
+    ;myGui.Add("GroupBox", "x8 y152 w300 h62", "Toggle any application to Always on top by hotkey")
 }
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -121,14 +122,14 @@ if(SettingsTAB)
     ;Admin
     myGui.SetFont()
     myGui.Add("GroupBox", "x8 y32 w175 h88", "Admin")
-    ogcRunAsThisAdminButton := myGui.Add("Button", "x16 y56 w152 h23  vRunAsThisAdminButton +Disabled", "Run This Script as admin")
+    ogcRunAsThisAdminButton := myGui.Add("Button", "x16 y56 w152 h23  vRunAsThisAdminButton", "Run This Script as admin")
     ogcRunAsThisAdminButton.OnEvent("Click", RunAsThisAdmin.Bind("Normal"))
-    ogcRunAsThisAdminCheckbox := myGui.Add("CheckBox", "x16 y88 w152 h23  vRunAsThisAdminCheckbox +Disabled", "Run as admin on script start")
+    ogcRunAsThisAdminCheckbox := myGui.AddCheckbox("x16 y88 w152 h23  vRunAsThisAdminCheckbox", "Run as admin on script start")
     ogcRunAsThisAdminCheckbox.OnEvent("Click", RunAsThisAdminCheckboxButton.Bind("Normal"))
     ;Shortcut
     myGui.SetFont()
     myGui.Add("GroupBox", "x182 y31 w120 h63", "Shortcut")
-    ogcButtonShortcuttoDesktop := myGui.Add("Button", "x192 y48 w95 h35", "Shortcut to Desktop")
+    ogcButtonShortcuttoDesktop := myGui.Add("Button", "x192 y48 w95 h35 +Disabled", "Shortcut to Desktop")
     ogcButtonShortcuttoDesktop.OnEvent("Click", Shortcut_to_desktop.Bind("Normal"))
     ;Report an issue
     myGui.SetFont("s15")
@@ -159,7 +160,7 @@ if(SettingsTAB)
     ;Delete
     myGui.SetFont()
     myGui.Add("GroupBox", "x8 y419 w170 h80", "Delete")
-    ogcButtonDeleteallsettings := myGui.Add("Button", "x16 y440 w103 h23 +Disabled", "Delete all settings")
+    ogcButtonDeleteallsettings := myGui.Add("Button", "x16 y440 w103 h23", "Delete all settings")
     ogcButtonDeleteallsettings.OnEvent("Click", DeleteAppSettings.Bind("Normal"))
     ogcButtonUninstall := myGui.Add("Button", "x16 y464 w103 h23 +Disabled", "Uninstall")
     ;Updates
@@ -177,6 +178,11 @@ if(SettingsTAB)
 ;________________________________________________________________________________________________________________________
 ;//////////////[Check Before Opening Script]///////////////
 ;Settings tab
+if(A_IsAdmin)
+{
+    ogcRunAsThisAdminButton.Text := "Already running as admin"
+    ogcRunAsThisAdminButton.Enabled := false
+}
 if(FileExist(AppSettingsIni))
 {
     ;Close To tray
@@ -200,12 +206,14 @@ if(FileExist(AppSettingsIni))
 }
 ;//////////////[Check for updates]///////////////
 ;Is check for updates enabled
-Temp_CheckUpdatesOnStartup := IniRead(AppSettingsIni, "Updates", "CheckOnStartup")
-if(Temp_CheckUpdatesOnStartup != "ERROR")
-    ogcCheckUpdatesOnStartup.Value := Temp_CheckUpdatesOnStartup
-if(Temp_CheckUpdatesOnStartup == 1)
+if(FileExist(AppSettingsIni))
 {
-    CheckForUpdates(False)
+    Temp_CheckUpdatesOnStartup := IniRead(AppSettingsIni, "Updates", "CheckOnStartup")
+    ogcCheckUpdatesOnStartup.Value := Temp_CheckUpdatesOnStartup
+    if(Temp_CheckUpdatesOnStartup == 1)
+    {
+        CheckForUpdates(False)
+    }
 }
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -213,7 +221,6 @@ if(Temp_CheckUpdatesOnStartup == 1)
 ;RandomCoffeeText := GetRandomCoffeeFact()
 myGui.Title := "Coffee Tools | " . Version . " | " . VersionTitle . " | Alpha | "
 myGui.Show("w835 h517")
-
 Return
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -264,18 +271,25 @@ Run("mmsys.cpl")
 }
 ClearWindowsTempFolder(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-ProgressGui := Gui("-Caption"), ProgressGui.Title := "Deleting Temporary Files..." , ProgressGui.SetFont("Bold"), ProgressGui.AddText("x0 w300 Center", "Deleting Temporary Files..."), gocProgress := ProgressGui.AddProgress("x10 w280 h20"), ProgressGui.SetFont(""), ProgressGui.AddText("x0 w300 Center", "Wait while the script is deleting temporary files."), ProgressGui.Show("W300")
-dir := A_Temp
-FileDelete(dir "\*.*")
-Loop Files, dir "\*.*", "D"
-{
-    gocProgress.Value := %A_Index%
-    DirDelete(A_LoopFileFullPath, 1)
-}
-gocProgress.Value := 100
-ProgressGui.Destroy
-MsgBox("Unused temporary files deleted.", "All Done!", "T5")
-return
+    ProgressGui := Gui("-Caption"), ProgressGui.Title := "Deleting Temporary Files..." , ProgressGui.SetFont("Bold"), ProgressGui.AddText("x0 w300 Center", "Deleting Temporary Files..."), gocProgress := ProgressGui.AddProgress("x10 w280 h20"), ProgressGui.SetFont(""), ProgressGui.AddText("x0 w300 Center", "Wait while the script is deleting temporary files."), ProgressGui.Show("W300")
+    MsgBoxText := "Unused temporary files deleted."
+    try
+    {
+        dir := A_Temp
+        FileDelete(dir "\*.*")
+        Loop Files, dir "\*.*", "D"
+        {
+            gocProgress.Value := %A_Index%
+            DirDelete(A_LoopFileFullPath, 1)
+        }
+    }
+    catch
+    {
+        MsgBoxText := "FileDelete Failed `nThis is script error`nWill be fixed on later versions"
+    }
+    gocProgress.Value := 100
+    ProgressGui.Destroy
+    MsgBox(MsgBoxText, "Temp Clear", "T5")
 }
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -288,12 +302,12 @@ ExitApp()
 }
 RunAsThisAdminCheckboxButton(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-oSaved := myGui.Submit("0")
-RunAsThisAdminCheckbox := oSaved.RunAsThisAdminCheckbox
-OnExitCloseToTrayCheckbox := oSaved.OnExitCloseToTrayCheckbox
-CheckUpdatesOnStartup := oSaved.CheckUpdatesOnStartup
-IniWrite(RunAsThisAdminCheckbox, AppSettingsIni, "Settings", "RunAsAdminOnStart")
-return
+    CreateDefaultDirectories()
+    oSaved := myGui.Submit("0")
+    RunAsThisAdminCheckbox := oSaved.RunAsThisAdminCheckbox
+    OnExitCloseToTrayCheckbox := oSaved.OnExitCloseToTrayCheckbox
+    CheckUpdatesOnStartup := oSaved.CheckUpdatesOnStartup
+    IniWrite(RunAsThisAdminCheckbox, AppSettingsIni, "Settings", "RunAsAdminOnStart")
 }
 ;Shortcut
 Shortcut_to_desktop(A_GuiEvent, GuiCtrlObj, Info, *)
@@ -338,6 +352,7 @@ return
 }
 OnExitCloseToTray(A_GuiEvent, GuiCtrlObj, Info, *)
 {
+    CreateDefaultDirectories()
     oSaved := myGui.Submit("0")
     RunAsThisAdminCheckbox := oSaved.RunAsThisAdminCheckbox
     OnExitCloseToTrayCheckbox := oSaved.OnExitCloseToTrayCheckbox
@@ -360,45 +375,52 @@ ShowChangelogMsgBox(Changelog)
 ;Debug
 OpenScriptFolder(A_GuiEvent, GuiCtrlObj, Info, *)
 {
- ;[TODO] add this
+    Run(AppFolder)
 }
 OpenThisInGithub(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-Run(GithubPage)
+    Run(GithubPage)
 }
 OpenAppSettingsFolder(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-Run(AppSettingsFolder)
+    Run(AppSettingsFolder)
 }
 OpenAppSettingsFile(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-Run(AppSettingsIni)
+    Run(AppSettingsIni)
 }
 ;Delete
 DeleteAppSettings(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-msgResult := MsgBox("All Settings will be deleted!", "Are you sure?", "1 T15")
-if (msgResult = "Cancel")
-{
-	return
-}
-else
-{
-    DirDelete(AppSettingsFolder, 1)
-    ;Reset all settings when settings files are removed
-    ogcCheckUpdatesOnStartup.Value := 0
-}
+    if(FileExist(AppSettingsFolder))
+    {
+        msgResult := MsgBox("All Settings will be deleted!`n(Script Will Reload)", "Are you sure?", "1 T15")
+        if (msgResult = "Cancel")
+        {
+            return
+        }
+        else
+        {
+            DirDelete(AppSettingsFolder, 1)
+            ;Reset all settings when settings files are removed
+            Run(A_ScriptFullPath)
+            ExitApp
+        }
+    }
+    else
+    {
+        MsgBox("No settings saved!","Nothing to delete!","T25")
+    }
 }
 ;Updates
 AutoUpdates(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-oSaved := myGui.Submit("0")
-RunAsThisAdminCheckbox := oSaved.RunAsThisAdminCheckbox
-OnExitCloseToTrayCheckbox := oSaved.OnExitCloseToTrayCheckbox
-CheckUpdatesOnStartup := oSaved.CheckUpdatesOnStartup
-DirCreate(AppFolder)
-DirCreate(AppSettingsFolder)
-IniWrite(CheckUpdatesOnStartup, AppSettingsIni, "Updates", "CheckOnStartup")
+    CreateDefaultDirectories()
+    oSaved := myGui.Submit("0")
+    RunAsThisAdminCheckbox := oSaved.RunAsThisAdminCheckbox
+    OnExitCloseToTrayCheckbox := oSaved.OnExitCloseToTrayCheckbox
+    CheckUpdatesOnStartup := oSaved.CheckUpdatesOnStartup
+    IniWrite(CheckUpdatesOnStartup, AppSettingsIni, "Updates", "CheckOnStartup")
 }
 ButtonCheckForUpdates(A_GuiEvent, GuiCtrlObj, Info, *)
 {
@@ -499,4 +521,11 @@ GetRandomCoffeeFact()
 GetRandomInRange(min, max) {
 	out := Random(min, max)
 	return out
+}
+CreateDefaultDirectories()
+{
+    if(!FileExist(AppFolder)) ;Just in case
+        DirCreate(AppFolder)
+    if(!FileExist(AppSettingsFolder))
+        DirCreate(AppSettingsFolder)
 }
