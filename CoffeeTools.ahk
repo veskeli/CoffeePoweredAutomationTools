@@ -22,7 +22,7 @@ Changelog:
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version := "0.21"
+Version := "0.22"
 VersionTitle := "AHK v2"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -169,9 +169,9 @@ if(SettingsTAB)
     myGui.SetFont("s15")
     myGui.Add("Text", "x664 y472 w158 h28 +0x200", "Version = " . Version)
     myGui.SetFont()
-    ogcCheckUpdatesOnStartup := myGui.Add("CheckBox", "x656 y416 w169 h23 vCheckUpdatesOnStartup +Disabled", "Check for updates on startup")
+    ogcCheckUpdatesOnStartup := myGui.Add("CheckBox", "x656 y416 w169 h23 vCheckUpdatesOnStartup", "Check for updates on startup")
     ogcCheckUpdatesOnStartup.OnEvent("Click", AutoUpdates.Bind("Normal"))
-    ogcButtonCheckforupdates := myGui.Add("Button", "x672 y440 w128 h23 +Disabled", "Check for updates")
+    ogcButtonCheckforupdates := myGui.Add("Button", "x672 y440 w128 h23", "Check for updates")
     ogcButtonCheckforupdates.OnEvent("Click", ButtonCheckForUpdates.Bind("Normal"))
 }
 ;________________________________________________________________________________________________________________________
@@ -193,7 +193,7 @@ if(FileExist(AppSettingsIni))
         ogcOnExitCloseToTrayCheckbox.Value := 1
     }
     ;Start As Admin
-    Temp_RunAsAdminOnStartup := IniRead(AppSettingsIni, "Settings", "RunAsAdminOnStart")
+    Temp_RunAsAdminOnStartup := IniRead(AppSettingsIni, "Settings", "RunAsAdminOnStart", False)
     if(Temp_RunAsAdminOnStartup == true)
     {
         ogcRunAsThisAdminCheckbox.Value := 1
@@ -208,7 +208,7 @@ if(FileExist(AppSettingsIni))
 ;Is check for updates enabled
 if(FileExist(AppSettingsIni))
 {
-    Temp_CheckUpdatesOnStartup := IniRead(AppSettingsIni, "Updates", "CheckOnStartup")
+    Temp_CheckUpdatesOnStartup := IniRead(AppSettingsIni, "Updates", "CheckOnStartup", False)
     ogcCheckUpdatesOnStartup.Value := Temp_CheckUpdatesOnStartup
     if(Temp_CheckUpdatesOnStartup == 1)
     {
@@ -424,7 +424,7 @@ AutoUpdates(A_GuiEvent, GuiCtrlObj, Info, *)
 }
 ButtonCheckForUpdates(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-CheckForUpdates(True)
+    CheckForUpdates(True)
 }
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
