@@ -23,6 +23,7 @@ AppFolder = %A_AppData%\%AppFolderName%
 AppSettingsFolder = %AppFolder%\Settings
 AppUpdaterFile = %AppFolder%\Updater.ahk
 AppUpdaterSettingsFile = %AppFolder%\UpdaterInfo.ini
+CurrentScriptBranch = main
 ;//////////////[Tabs]///////////////
 HomeTAB := true
 SettingsTAB := true
@@ -37,6 +38,11 @@ AppHotkeysIni = %AppSettingsFolder%\Hotkeys.ini
 AppVersionIdListIni = %AppFolder%\temp\VersionIdList.ini
 AppPreVersionsIni = %AppFolder%\temp\PreVersions.ini
 AppOtherScriptsIni = %AppOtherScriptsFolder%\OtherScripts.ini
+;//////////////[Global variables]///////////////
+global Version
+global ScriptName
+global AppUpdaterSettingsFile
+global CurrentScriptBranch
 ;____________________________________________________________
 ;//////////////[Tab Control]///////////////
 IniRead, T_HomeTab, %AppSettingsIni%,Tabs,Home
@@ -126,12 +132,48 @@ if(SettingsTAB)
     Gui 1:Font
     Gui 1:Add, GroupBox, x648 y392 w179 h117, Updates
     Gui 1:Font, s15
-    Gui 1:Add, Text, x664 y472 w158 h28 +0x200, Version = %version%
+    Gui 1:Add, Text, x664 y472 w158 h28 +0x200, Version = %Version%
     Gui 1:Font
-    Gui 1:Add, CheckBox, x656 y416 w169 h23 +Disabled, Check for updates on startup
-    Gui 1:Add, Button, x672 y440 w128 h23 +Disabled, Check for updates
+    Gui 1:Add, CheckBox, x656 y416 w169 h23 vCheckUpdatesOnStartup gAutoUpdates, Check for updates on startup
+    Gui 1:Add, Button, x672 y440 w128 h23 gButtonCheckForUpdates, Check for updates
 }
-;Show GUI
+;________________________________________________________________________________________________________________________
+;________________________________________________________________________________________________________________________
+;//////////////[Check Before Opening Script]///////////////
+;Settings tab
+if(FileExist(AppSettingsIni))
+{
+    ;Close To tray
+    iniread, Temp_CloseToTray,%AppSettingsIni%,Settings,CloseToTray
+    if(%Temp_CloseToTray% == true)
+    {
+        CloseToTray := true
+        GuiControl,1:,OnExitCloseToTrayCheckbox,1
+    }
+    ;Start As Admin
+    iniread, Temp_RunAsAdminOnStartup,%AppSettingsIni%,Settings,RunAsAdminOnStart
+    if(Temp_RunAsAdminOnStartup == true)
+    {
+        GuiControl,1:,RunAsThisAdminCheckbox,1
+        if(!A_IsAdmin)
+        {
+            Run *RunAs %A_ScriptFullPath%
+            ExitApp
+        }
+    }
+}
+;//////////////[Check for updates]///////////////
+;Is check for updates enabled
+IniRead, Temp_CheckUpdatesOnStartup, %AppSettingsIni%, Updates, CheckOnStartup
+if(Temp_CheckUpdatesOnStartup != "ERROR")
+    GuiControl,1:,CheckUpdatesOnStartup,%Temp_CheckUpdatesOnStartup%
+if(Temp_CheckUpdatesOnStartup == 1)
+{
+    CheckForUpdates()
+}
+;________________________________________________________________________________________________________________________
+;________________________________________________________________________________________________________________________
+;//////////////[Show Gui]///////////////
 Gui 1:Show, w835 h517, Coffee Tools | %Version% | No Auto Updates!
 Return
 ;________________________________________________________________________________________________________________________
@@ -272,6 +314,15 @@ else
 }
 return
 ;Updates
+AutoUpdates:
+Gui, 1:Submit, Nohide
+FileCreateDir, %AppFolder%
+FileCreateDir, %AppSettingsFolder%
+IniWrite, %CheckUpdatesOnStartup%, %AppSettingsIni%, Updates, CheckOnStartup
+return
+ButtonCheckForUpdates:
+CheckForUpdates()
+Return
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Functions]///////////////
@@ -325,5 +376,22 @@ NotAdminError(T_CustomMessage = "")
                 ExitApp
             }
         }
+    }
+}
+CheckForUpdates()
+{
+    if(!FileExist(AppUpdaterFile))
+    {
+        ;Updater File Missing!!
+        ;[TODO]
+        MsgBox Updater File Is Missing!
+    }
+    else
+    {
+        IniWrite, %Version%,%AppUpdaterSettingsFile%,Options,Version
+        IniWrite, %A_ScriptFullPath%,%AppUpdaterSettingsFile%,Options,ScriptFullPath
+        IniWrite, %CurrentScriptBranch%,%AppUpdaterSettingsFile%,Options,Branch
+
+        run, %AppUpdaterFile%
     }
 }
