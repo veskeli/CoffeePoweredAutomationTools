@@ -1,77 +1,130 @@
 ;TODO
 ;Install as exe, Shortcut to desktop, Change location and Handle Cancel
-#SingleInstance, Force
-SetBatchLines, -1
-ListLines, Off
-SetWorkingDir, %A_ScriptDir%
-SplitPath, A_ScriptName, , , , GameScripts
-#Persistent
+#SingleInstance Force
+; REMOVED: SetBatchLines, -1
+ListLines(false)
+SetWorkingDir(A_ScriptDir)
+SplitPath(A_ScriptName, , , , &GameScripts)
+Persistent
 ;____________________________________________________________
 ;//////////////[Installer Variables]///////////////
-InstallerVersion = 0.4
+InstallerVersion := "0.5"
 global InstallerVersion
 ;//////////////[Folders]///////////////
-ScriptName = CoffeeTools
-AppFolderName = CoffeePoweredAutomationTools
-AppFolder = %A_AppData%\%AppFolderName%
-AppSettingsFolder = %AppFolder%\Settings
-MainScriptAhkFile = %AppFolder%\%ScriptName%.ahk
-DownloadLocation = % A_ScriptDir . "\" . ScriptName . ".ahk"
-UpdaterDownloadLocation = % A_ScriptDir . "\Updater.ahk"
+ScriptName := "CoffeeTools"
+AppFolderName := "CoffeePoweredAutomationTools"
+AppFolder := A_AppData . "\" . AppFolderName
+AppSettingsFolder := AppFolder . "\Settings"
+MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
+DownloadLocation := A_ScriptDir . "\" . ScriptName . ".ahk"
+UpdaterDownloadLocation := A_ScriptDir . "\Updater.ahk"
 ;//////////////[Links]///////////////
 GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/main/"
 AppGithubDownloadURL := GithubReposityLink ScriptName ".ahk"
 UpdaterGithubDownloadURL := GithubReposityLink "Updater.ahk"
 ;//////////////[ini]///////////////
-AppSettingsIni = %AppSettingsFolder%\Settings.ini
+AppSettingsIni := AppSettingsFolder . "\Settings.ini"
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Gui]///////////////
-Menu Tray, Icon, shell32.dll, 163
+TraySetIcon("shell32.dll","163")
 
-Gui -MaximizeBox
-Gui Font, s9, Segoe UI
-Gui Font
-Gui Font, s14
-Gui Add, Text, x8 y0 w293 h23 +0x200, Coffee Powered Automation Tools
-Gui Font
-Gui Font, s9, Segoe UI
-Gui Add, Progress, x8 y24 w295 h20 -Smooth vInstallBar, 0
-Gui Add, Radio, x8 y48 w45 h23 +Checked vInstallAsAhk +Disabled, AHK
-Gui Add, Radio, x56 y48 w42 h23 vInstallAsExe +Disabled, EXE
-Gui Add, Edit, x8 y72 w259 h21 vLocation +Disabled, % AppFolder
-Gui Add, Button, x272 y72 w24 h23 vChangeLocation +Disabled, ...
-Gui Add, Button, x8 y104 w80 h23 vInstallScriptButton gInstallScript, Install
-Gui Add, CheckBox, x96 y104 w120 h23 vShortCutToDesktop +Disabled, Shortcut to desktop
-Gui Add, Button, x224 y104 w80 h23 gCancelInstall, Cancel
-Gui Font, s8
-Gui Add, Text, x104 y48 w201 h23 +0x200, [Exe can be pinned and contains icon]
-Gui Font
+myGui := Gui()
+myGui.OnEvent("Close", GuiEscape)
+myGui.OnEvent("Escape", GuiEscape)
+myGui.Opt("-MaximizeBox")
+myGui.SetFont("s9", "Segoe UI")
+myGui.SetFont()
+myGui.SetFont("s14")
+myGui.Add("Text", "x8 y0 w293 h23 +0x200", "Coffee Powered Automation Tools")
+myGui.SetFont()
+myGui.SetFont("s9", "Segoe UI")
+ogcProgressInstallBar := myGui.Add("Progress", "x8 y24 w295 h20 -Smooth vInstallBar", "0")
+ogcRadioInstallAsAhk := myGui.Add("Radio", "x8 y48 w45 h23 +Checked vInstallAsAhk +Disabled", "AHK")
+ogcRadioInstallAsExe := myGui.Add("Radio", "x56 y48 w42 h23 vInstallAsExe +Disabled", "EXE")
+ogcEditLocation := myGui.Add("Edit", "x8 y72 w259 h21 vLocation +Disabled", AppFolder)
+ogcButtonChangeLocation := myGui.Add("Button", "x272 y72 w24 h23 vChangeLocation +Disabled", "...")
+;ogcButtonChangeLocation.OnEvent("Click", Button....Bind("Normal"))
+ogcInstallScriptButton := myGui.Add("Button", "x8 y104 w80 h23 vInstallScriptButton", "Install")
+ogcInstallScriptButton.OnEvent("Click", InstallScript.Bind("Normal"))
+ogcCheckBoxShortCutToDesktop := myGui.Add("CheckBox", "x96 y104 w120 h23 vShortCutToDesktop +Disabled", "Shortcut to desktop")
+ogcButtonCancel := myGui.Add("Button", "x224 y104 w80 h23", "Cancel")
+ogcButtonCancel.OnEvent("Click", GuiEscape.Bind("Normal"))
+myGui.SetFont("s8")
+myGui.Add("Text", "x104 y48 w201 h23 +0x200", "[Exe can be pinned and contains icon]")
+myGui.SetFont()
 
-Gui Show, w312 h135, Coffee Tools Installer
+myGui.Title := "Coffee Tools Installer"
+myGui.Show("w312 h135")
 Return
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Close]///////////////
-GuiEscape:
-GuiClose:
-CancelInstall:
-    ExitApp
+GuiEscape(*)
+{
+    ExitApp()
+}
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Install]///////////////
-InstallScript:
-Gui, Submit, Nohide
-SetProgressBarState("0")
-SetControlState("Disable")
-;Check if already installed
-if (FileExist(MainScriptAhkFile))
+InstallScript(A_GuiEvent, GuiCtrlObj, Info, *)
+{
+    oSaved := myGui.Submit("0")
+    InstallAsAhk := oSaved.InstallAsAhk
+    InstallAsExe := oSaved.InstallAsExe
+    Location := oSaved.Location
+    ShortCutToDesktop := oSaved.ShortCutToDesktop
+    SetProgressBarState("0")
+    SetControlState("Disable")
+    ;Check if already installed
+    if (FileExist(MainScriptAhkFile))
     {
-        IniRead, InstalledCheck, %AppSettingsIni%, install, installFolder, Default
-        if(InstalledCheck != "Error" or InstalledCheck != "")
+        InstalledCheck := IniRead(AppSettingsIni, "install", "installFolder", "Default")
+    }
+    if(InstalledCheck != "Error" or InstalledCheck != "")
+    {
+        msgResult := MsgBox("Already installed!`ncontinue?", "Already installed", 4)
+        if (msgResult = "No")
         {
-            MsgBox, 4,Already installed, Already installed!`ncontinue?
-            IfMsgBox No
+            SetProgressBarState("0")
+            SetControlState("Enable")
+            Return
+        }
+    }
+    ;Create all folders
+    DirCreate(AppFolder)
+    DirCreate(AppSettingsFolder)
+    SetProgressBarState("10")
+    try{
+        SetProgressBarState("60")
+        ;App
+        Download(AppGithubDownloadURL,AppFolder . "\" . ScriptName . ".ahk")
+        ;Updater
+        Download(UpdaterGithubDownloadURL,AppFolder . "\Updater.ahk")
+    }
+    Catch
+    {
+        Try{
+            ;App
+            Download(AppGithubDownloadURL,DownloadLocation)
+            FileMove(DownloadLocation, AppFolder . "\" . ScriptName . ".ahk")
+            ;Updater
+            Download(UpdaterGithubDownloadURL,UpdaterDownloadLocation)
+            FileMove(UpdaterDownloadLocation, AppFolder . "\Updater.ahk")
+        }
+        Catch{
+            if(A_IsAdmin)
+            {
+                MsgBox("Script is already running as admin`nTry to download Newer or older installer!", "Error", "")
+                ExitApp()
+            }
+            msgResult := MsgBox("[Main script] URL Download Error `nInstall Can't continue`nWould you like to restart as admin?", "Install Error", 4)
+            if (msgResult = "Yes")
+            {
+                Run("*RunAs " A_ScriptFullPath)
+                ExitApp()
+            }
+            Else
             {
                 SetProgressBarState("0")
                 SetControlState("Enable")
@@ -79,67 +132,26 @@ if (FileExist(MainScriptAhkFile))
             }
         }
     }
-;Create all folders
-FileCreateDir,%AppFolder%
-FileCreateDir,%AppSettingsFolder%
-SetProgressBarState("10")
-try{
-    SetProgressBarState("60")
-    ;App
-    UrlDownloadToFile, % AppGithubDownloadURL,% AppFolder . "\" . ScriptName . ".ahk"
-    ;Updater
-    UrlDownloadToFile, % UpdaterGithubDownloadURL,% AppFolder . "\Updater.ahk"
-}
-Catch
-{
-    Try{
-        ;App
-        UrlDownloadToFile, % AppGithubDownloadURL,% DownloadLocation
-        FileMove, % DownloadLocation, % AppFolder . "\" . ScriptName . ".ahk"
-        ;Updater
-        UrlDownloadToFile, % UpdaterGithubDownloadURL,% UpdaterDownloadLocation
-        FileMove, % UpdaterDownloadLocation, % AppFolder . "\Updater.ahk"
+    ;Install done
+    SetProgressBarState("100")
+    ;Would you like to open the script?
+    msgResult := MsgBox("Would you like to open the script?", "Install successful", 4)
+    if (msgResult = "Yes")
+    {
+        Run(AppFolder . "\" . ScriptName . ".ahk")
+        ExitApp()
     }
-    Catch{
-        if(A_IsAdmin)
-        {
-            MsgBox,,Error,Script is already running as admin`nTry to download Newer or older installer!
-            ExitApp
-        }
-        MsgBox, 4,Install Error, [Main script] URL Download Error `nInstall Can't continue`nWould you like to restart as admin?
-        IfMsgBox Yes
-        {
-            Run *RunAs %A_ScriptFullPath%
-            ExitApp
-        }
-        Else
-        {
-            SetProgressBarState("0")
-            SetControlState("Enable")
-            Return
-        }
-    }
+    ;Install done
+    SetControlState("Enable")
+    Sleep(2000)
+    SetProgressBarState("0")
 }
-;Install done
-SetProgressBarState("100")
-;Would you like to open the script?
-MsgBox, 4,Install successful, Would you like to open the script?
-IfMsgBox Yes
-{
-    run,% AppFolder . "\" . ScriptName . ".ahk"
-    ExitApp
-}
-;Install done
-SetControlState("Enable")
-sleep 2000
-SetProgressBarState("0")
-Return
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Voids]///////////////
 SetProgressBarState(State)
 {
-    GuiControl,, InstallBar, %State%
+    ogcProgressInstallBar.Value := State
 }
 SetControlState(State)
 {
@@ -147,6 +159,4 @@ SetControlState(State)
     ;GuiControl, %State%,InstallAsAhk
     ;GuiControl, %State%,InstallAsExe
     ;GuiControl, %State%,Location
-    GuiControl, %State%,ChangeLocation
-    GuiControl, %State%,InstallScriptButton
 }
