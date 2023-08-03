@@ -13,8 +13,8 @@ ProgressBarVisible := False
 global ProgressBarVisible
 ;____________________________________________________________
 ;//////////////[Folders]///////////////
-ScriptName = GameScripts
-AppFolderName = AHKGameScriptsByVeskeli
+ScriptName = CoffeeTools
+AppFolderName = CoffeePoweredAutomationTools
 AppFolder = %A_AppData%\%AppFolderName%
 AppSettingsFolder = %AppFolder%\Settings
 MainScriptFile = %AppFolder%\%ScriptName%
