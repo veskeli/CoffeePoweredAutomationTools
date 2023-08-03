@@ -137,7 +137,7 @@ UpdateScript(newversion,branch) ;[TODO] Get correct file based on version (Curre
     ;Save branch
     IniWrite, %branch%,%AppSettingsIni%,Branch,Instance1
     ;Set Progressbar
-    SetProgressBarText(Downloading new version: %newversion%)
+    SetProgressBarText("Downloading new version: %newversion%")
     SetProgressBarState(5)
     ;Delete old file
     FileDelete, %MainScriptFile%
