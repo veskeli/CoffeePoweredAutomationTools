@@ -17,29 +17,15 @@ ScriptName = GameScripts
 AppFolderName = AHKGameScriptsByVeskeli
 AppFolder = %A_AppData%\%AppFolderName%
 AppSettingsFolder = %AppFolder%\Settings
-AppUpdaterFile = %AppFolder%\Updater.ahk
-GuiPictureFolder = %AppFolder%\Gui
 MainScriptFile = %AppFolder%\%ScriptName%
 MainScriptAhkFile = %AppFolder%\%ScriptName%.ahk
 AppUpdaterSettingsFile = %AppFolder%\UpdaterInfo.ini
-AppVersionSettingsFile = %AppFolder%\VersionInfo.ini
-AppScriptTempFile = %A_ScriptDir%\GameSciptTemp.ini
-;//////////////[Other Scripts]///////////////
-AppGamingScriptsFolder = %AppFolder%\GamingScripts
-AppOtherScriptsFolder = %AppFolder%\OtherScripts
 ;//////////////[ini]///////////////
 AppSettingsIni = %AppSettingsFolder%\Settings.ini
-AppGameScriptSettingsIni = %AppSettingsFolder%\GameScriptSettings.ini
-AppHotkeysIni = %AppSettingsFolder%\Hotkeys.ini
-AppVersionIdListIni = %AppFolder%\temp\VersionIdList.ini
-AppPreVersionsIni = %AppFolder%\temp\PreVersions.ini
-AppOtherScriptsIni = %AppOtherScriptsFolder%\OtherScripts.ini
 ;//////////////[Update]///////////////
 AppUpdateFile = %AppFolder%\temp\Updater.ahk
 ;//////////////[Links]///////////////
 GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/main/"
-AppGithubDownloadURL := GithubReposityLink ScriptName ".ahk"
-UpdaterGithubDownloadURL := GithubReposityLink "Updater.ahk"
 ;//////////////[Script Dir]///////////////
 ScriptFullPath =
 T_SkipShortcut = false
@@ -194,7 +180,7 @@ UpdateUpdater(newversion) ;[TODO] Update from correct branch and version
 {
     FileCreateDir, %AppFolder%\temp
     FileMove, %A_ScriptFullPath%, %AppUpdateFile%, 1
-    UrlDownloadToFile, %UpdaterGithubDownloadURL%, %A_ScriptFullPath%
+    UrlDownloadToFile, % VersionUrlGithub . branch . "/Updater.ahk", %A_ScriptFullPath%
     ExitApp
 }
 ;____________________________________________________________
