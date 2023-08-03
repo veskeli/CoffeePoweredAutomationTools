@@ -68,7 +68,7 @@ Else
     }
     */
 }
-CheckForUpdaterUpdates()
+CheckForUpdaterUpdates() ;[TODO] Not working
 ExitApp
 ;____________________________________________________________
 ;____________________________________________________________
