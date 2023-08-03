@@ -34,6 +34,7 @@ FixUserLocation = false
 ShortcutState = 1
 AppInstallLocation =
 ;Global
+global MainScriptAhkFile
 global ShowRunningLatestMessage
 global GithubReposityLink
 ;____________________________________________________________
