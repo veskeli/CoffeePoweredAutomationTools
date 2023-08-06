@@ -26,7 +26,7 @@ Changelog:
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version := "0.231"
+Version := "0.232"
 VersionTitle := "AHK v2"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -147,6 +147,7 @@ if(SettingsTAB)
     ogcOnExitCloseToTrayCheckbox := myGui.Add("CheckBox", "x16 y168 w140 h23  vOnExitCloseToTrayCheckbox +Disabled", "On Exit close to tray")
     ogcOnExitCloseToTrayCheckbox.OnEvent("Click", OnExitCloseToTray.Bind("Normal"))
     ogcButtonRedownloadassets := myGui.Add("Button", "x16 y192 w133 h28", "Redownload assets")
+    ogcButtonRedownloadassets.OnEvent("Click", RedownloadAssets.Bind("Normal"))
     ogcButtonShowChangelog := myGui.Add("Button", "x16 y224 w133 h23", "Show Changelog")
     ogcButtonShowChangelog.OnEvent("Click", ShowChangelogButton.Bind("Normal"))
     ogcButtonCustomizeTabs := myGui.Add("Button", "x16 y252 w133 h23 +Disabled", "Customize Tabs")
