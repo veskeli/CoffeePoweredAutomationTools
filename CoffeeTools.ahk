@@ -21,11 +21,12 @@ Changelog:
 + Fixing and enabling settings
 + Coffee quotes are back (282 Coffee quotes)
 + Tray menu is back
++ Asset download
 )"
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version := "0.23"
+Version := "0.231"
 VersionTitle := "AHK v2"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -371,7 +372,18 @@ OnExitCloseToTray(A_GuiEvent, GuiCtrlObj, Info, *)
 }
 RedownloadAssets(*)
 {
-    IniWrite(True, AppUpdaterSettingsFile, "Options", "RedownloadAssets")
+    if(FileExist(AppUpdaterFile))
+    {
+        CreateDefaultDirectories()
+        IniWrite(True, AppUpdaterSettingsFile, "Options", "RedownloadAssets")
+        Run(AppUpdaterFile)
+    }
+    else
+    {
+        ;Updater File Missing!!
+        ;[TODO]
+        MsgBox("Updater File Is Missing!")
+    }
 }
 ShowChangelogButton(A_GuiEvent, GuiCtrlObj, Info, *)
 {
