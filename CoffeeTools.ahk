@@ -19,11 +19,13 @@ Changelog := "
 Changelog:
 + AHK v2
 + Fixing and enabling settings
++ Coffee quotes are back (282 Coffee quotes)
++ Tray menu is back
 )"
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version := "0.22"
+Version := "0.23"
 VersionTitle := "AHK v2"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -143,7 +145,7 @@ if(SettingsTAB)
     ogcCheckBoxKeepthisalwaysontop.OnEvent("Click", KeepThisAlwaysOnTop.Bind("Normal"))
     ogcOnExitCloseToTrayCheckbox := myGui.Add("CheckBox", "x16 y168 w140 h23  vOnExitCloseToTrayCheckbox +Disabled", "On Exit close to tray")
     ogcOnExitCloseToTrayCheckbox.OnEvent("Click", OnExitCloseToTray.Bind("Normal"))
-    ogcButtonRedownloadassets := myGui.Add("Button", "x16 y192 w133 h28 +Disabled", "Redownload assets")
+    ogcButtonRedownloadassets := myGui.Add("Button", "x16 y192 w133 h28", "Redownload assets")
     ogcButtonShowChangelog := myGui.Add("Button", "x16 y224 w133 h23", "Show Changelog")
     ogcButtonShowChangelog.OnEvent("Click", ShowChangelogButton.Bind("Normal"))
     ogcButtonCustomizeTabs := myGui.Add("Button", "x16 y252 w133 h23 +Disabled", "Customize Tabs")
@@ -219,8 +221,8 @@ if(FileExist(AppSettingsIni))
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Show Gui]///////////////
-;RandomCoffeeText := GetRandomCoffeeFact()
-myGui.Title := "Coffee Tools | " . Version . " | " . VersionTitle . " | Alpha | "
+RandomCoffeeText := GetRandomCoffeeFact()
+myGui.Title := "Coffee Tools | " . Version . " | " . VersionTitle . " | Alpha | " . RandomCoffeeText
 myGui.Show("w835 h517")
 Return
 ;________________________________________________________________________________________________________________________
@@ -313,43 +315,41 @@ RunAsThisAdminCheckboxButton(A_GuiEvent, GuiCtrlObj, Info, *)
 ;Shortcut
 Shortcut_to_desktop(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-MsgBox("Not Working yet", "", "T25")
-/*
-if(IsEXERunnerEnabled)
-{
-    IniRead, T_RevertLocation,%AppSettingsIni%, ExeRunner, ExeFileLocation
-    if(T_RevertLocation = "ERROR")
+    MsgBox("Not Working yet", "", "T25")
+    /*
+    if(IsEXERunnerEnabled)
     {
-        iniread,T_RevertLocation,%AppSettingsIni%, ExeRunner, OldAhkFileLocation
+        IniRead, T_RevertLocation,%AppSettingsIni%, ExeRunner, ExeFileLocation
+        if(T_RevertLocation = "ERROR")
+        {
+            iniread,T_RevertLocation,%AppSettingsIni%, ExeRunner, OldAhkFileLocation
+        }
+        IniRead, UseCorrectFolder,%AppSettingsIni%,Appdata,UseCorrectFolder
+        if(UseCorrectFolder == "true")
+        {
+            IniRead, CorrectDesktop,%AppSettingsIni%,Appdata,CorrectDesktop
+            FileCreateShortcut,% T_RevertLocation . "\" . ScriptName . ".exe", %CorrectDesktop%\%ScriptName%.lnk
+        }
+        Else
+        {
+            FileCreateShortcut,% T_RevertLocation . "\" . ScriptName . ".exe", %A_Desktop%\%ScriptName%.lnk
+        }
     }
-    IniRead, UseCorrectFolder,%AppSettingsIni%,Appdata,UseCorrectFolder
-    if(UseCorrectFolder == "true")
+    else
     {
-        IniRead, CorrectDesktop,%AppSettingsIni%,Appdata,CorrectDesktop
-        FileCreateShortcut,% T_RevertLocation . "\" . ScriptName . ".exe", %CorrectDesktop%\%ScriptName%.lnk
+        FileCreateShortcut,"%A_ScriptFullPath%", %A_Desktop%\%ScriptName%.lnk
     }
-    Else
-    {
-        FileCreateShortcut,% T_RevertLocation . "\" . ScriptName . ".exe", %A_Desktop%\%ScriptName%.lnk
-    }
-}
-else
-{
-    FileCreateShortcut,"%A_ScriptFullPath%", %A_Desktop%\%ScriptName%.lnk
-}
-*/
+    */
 }
 ;Report an issue
 ReportAnIssueOrBug(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-Run(GithubPage . "/issues")
-return
+    Run(GithubPage . "/issues")
 }
 ;Settings for this script
 KeepThisAlwaysOnTop(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-WinSetAlwaysOnTop(, "A")
-return
+    WinSetAlwaysOnTop(, "A")
 }
 OnExitCloseToTray(A_GuiEvent, GuiCtrlObj, Info, *)
 {
@@ -369,14 +369,21 @@ OnExitCloseToTray(A_GuiEvent, GuiCtrlObj, Info, *)
         IniWrite("false", AppSettingsIni, "Settings", "CloseToTray")
     }
 }
+RedownloadAssets(*)
+{
+    IniWrite(True, AppUpdaterSettingsFile, "Options", "RedownloadAssets")
+}
 ShowChangelogButton(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-ShowChangelogMsgBox(Changelog)
+    ShowChangelogMsgBox(Changelog)
 }
 ;Debug
 OpenScriptFolder(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-    Run(AppFolder)
+    if(FileExist(AppFolder))
+        Run(AppFolder)
+    else
+        FileOrFolderMissing(true)
 }
 OpenThisInGithub(A_GuiEvent, GuiCtrlObj, Info, *)
 {
@@ -384,11 +391,17 @@ OpenThisInGithub(A_GuiEvent, GuiCtrlObj, Info, *)
 }
 OpenAppSettingsFolder(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-    Run(AppSettingsFolder)
+    if(FileExist(AppSettingsFolder))
+        Run(AppSettingsFolder)
+    else
+        FileOrFolderMissing(true)
 }
 OpenAppSettingsFile(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-    Run(AppSettingsIni)
+    if(FileExist(AppSettingsIni))
+        Run(AppSettingsIni)
+    else
+        FileOrFolderMissing(false)
 }
 ;Delete
 DeleteAppSettings(A_GuiEvent, GuiCtrlObj, Info, *)
@@ -430,14 +443,11 @@ ButtonCheckForUpdates(A_GuiEvent, GuiCtrlObj, Info, *)
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Functions]///////////////
-
 UpdateTrayicon()
 {
-        ;Tray:= A_TrayMenu
-        ;Tray.Click("1")
-        ;Tray.Delete()
-        ;Tray.Delete() ; V1toV2: not 100% replacement of NoStandard, Only if NoStandard is used at the beginning
-        ;Tray.Add("Show GUI", OpenMainGui)
+        Tray:= A_TrayMenu
+        Tray.Delete()
+        Tray.Add("Show GUI", OpenMainGui)
         ;Menu,Tray,Add
         ;Menu,GameActions,Add,Xbox Overlay,ToggleXboxOverlay2
         ;Menu,GameActions,Add,Game DVR,ToggleGameDVR2
@@ -453,9 +463,9 @@ UpdateTrayicon()
         ;Menu,Tray,Add,Run IpConfig,RunIpConfig
         ;Menu,Tray,Add,Open Sounds,OpenSounds
         ;Menu,Tray,Add
-        ;Tray.Add("E&xit", EXIT)
-        ;Tray.Default := "Show GUI"
-        ;Tray.Tip("Game Script Ahk")
+        Tray.Add("E&xit", EXIT)
+        Tray.Default := "Show GUI"
+        ;Tray.Tip(ScriptName)
 }
 NotAdminError(T_CustomMessage := "")
 {
@@ -511,7 +521,7 @@ GetRandomCoffeeFact()
     {
         Facts := Fileread(RandomCoffeeQuotesFile)
         myArray := StrSplit(Facts, "`n")
-        randomElement := myArray[GetRandomInRange(1, myArray.maxindex() )]
+        randomElement := myArray[GetRandomInRange(1, myArray.Length)]
         Return randomElement
     }
     Else
@@ -529,4 +539,15 @@ CreateDefaultDirectories()
         DirCreate(AppFolder)
     if(!FileExist(AppSettingsFolder))
         DirCreate(AppSettingsFolder)
+}
+FileOrFolderMissing(IsFolder)
+{
+    if(IsFolder)
+    {
+        MsgBox("Folder does not exist.","Folder Missing","T20")
+    }
+    else
+    {
+        MsgBox("File does not exist.","File Missing","T20")
+    }
 }
