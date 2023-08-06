@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.42"
+UpdaterVersion := "0.43"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -151,6 +151,12 @@ TryUpdateScript(T_CheckForUpdates,T_Branch)
 ;Activate Download
 StartUpdate(newversion,branch)
 {
+    CloseMainScript()
+    ;Update Script
+    UpdateScript(newversion,branch)
+}
+CloseMainScript()
+{
     ;Check That if script is running
     SetTitleMatchMode(2)
     DetectHiddenWindows(true)
@@ -159,8 +165,6 @@ StartUpdate(newversion,branch)
         ;Stop Script
         WinClose()
     }
-    ;Update Script
-    UpdateScript(newversion,branch)
 }
 UpdateScript(newversion,branch) ;[TODO] Get correct file based on version (Currently gets latest from github)
 {
@@ -199,16 +203,25 @@ UpdateScript(newversion,branch) ;[TODO] Get correct file based on version (Curre
 ;//////////////[Assets]///////////////
 RedownloadAssets()
 {
+    CloseMainScript()
+    SetProgressBarText("Deleting old assets")
+    SetProgressBarState(5)
     ;Delete old assets
     if(FileExist(RandomCoffeeQuotesFile))
         FileDelete(RandomCoffeeQuotesFile)
     ;Download Assets
+    SetProgressBarText("Downloading assets")
+    SetProgressBarState(50)
     DownloadAssets()
+    Run(MainScriptAhkFile)
+    SetProgressBarState(-1)
+    ExitApp()
 }
 DownloadAssets()
 {
     if(!FileExist(RandomCoffeeQuotesFile))
         Download(GithubReposityLink . MainScriptBranch . "/Other/texts/RandomCoffeeQuotes.txt",RandomCoffeeQuotesFile)
+    SetProgressBarState(100)
 }
 ;____________________________________________________________
 ;//////////////[Updater updates]///////////////
