@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.41"
+UpdaterVersion := "0.42"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -22,6 +22,8 @@ MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
 ;//////////////[ini]///////////////
 AppSettingsIni := AppSettingsFolder . "\Settings.ini"
+;//////////////[Assets]///////////////
+RandomCoffeeQuotesFile := AppSettingsFolder . "\RandomCoffeeQuotes.txt"
 ;//////////////[Update]///////////////
 AppUpdateFile := AppFolder . "\temp\Updater.ahk"
 ShowRunningLatestMessage := True
@@ -55,16 +57,25 @@ oGui2.OnEvent("Escape", GuiEscape)
 ;//////////////[Update Script]///////////////
 if FileExist(AppUpdaterSettingsFile)
 {
-    version := IniRead(AppUpdaterSettingsFile, "Options", "Version")
-    MainScriptFile := IniRead(AppUpdaterSettingsFile, "Options", "ScriptFullPath")
-    MainScriptBranch := IniRead(AppUpdaterSettingsFile, "Options", "Branch")
-    ShowRunningLatestMessage := IniRead(AppUpdaterSettingsFile, "Options", "ShowRunningLatestMessage")
+    BRedownloadAssets := IniRead(AppUpdaterSettingsFile, "Options", "RedownloadAssets", False)
+    version := IniRead(AppUpdaterSettingsFile, "Options", "Version", False)
+    MainScriptFile := IniRead(AppUpdaterSettingsFile, "Options", "ScriptFullPath", False)
+    MainScriptBranch := IniRead(AppUpdaterSettingsFile, "Options", "Branch", False)
+    ShowRunningLatestMessage := IniRead(AppUpdaterSettingsFile, "Options", "ShowRunningLatestMessage", False)
+    global BRedownloadAssets
     global version
     global MainScriptFile
     global MainScriptBranch
     FileDelete(AppUpdaterSettingsFile)
 
-    TryUpdateScript(true,MainScriptBranch)
+    if(BRedownloadAssets)
+    {
+        DownloadAssets()
+    }
+    else
+    {
+        TryUpdateScript(true,MainScriptBranch)
+    }
 }
 Else
 {
@@ -164,10 +175,12 @@ UpdateScript(newversion,branch) ;[TODO] Get correct file based on version (Curre
     SetProgressBarState(50)
 
     DownloadLink := GithubReposityLink . branch . "/CoffeeTools.ahk"
-    SetProgressBarState(95)
+    SetProgressBarState(75)
     ;Download new file
     Download(DownloadLink,MainScriptFile)
-    ;SplashTextOff
+    SetProgressBarState(90)
+    ;Download Assets
+    DownloadAssets()
     SetProgressBarState(100)
     Loop
     {
@@ -181,6 +194,21 @@ UpdateScript(newversion,branch) ;[TODO] Get correct file based on version (Curre
     }
     SetProgressBarState(-1) ;Just in case of idk
     ExitApp()
+}
+;____________________________________________________________
+;//////////////[Assets]///////////////
+RedownloadAssets()
+{
+    ;Delete old assets
+    if(FileExist(RandomCoffeeQuotesFile))
+        FileDelete(RandomCoffeeQuotesFile)
+    ;Download Assets
+    DownloadAssets()
+}
+DownloadAssets()
+{
+    if(!FileExist(RandomCoffeeQuotesFile))
+        Download(GithubReposityLink . MainScriptBranch . "/Other/texts/RandomCoffeeQuotes.txt",RandomCoffeeQuotesFile)
 }
 ;____________________________________________________________
 ;//////////////[Updater updates]///////////////
