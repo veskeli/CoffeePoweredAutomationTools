@@ -22,11 +22,12 @@ Changelog:
 + Coffee quotes are back (282 Coffee quotes)
 + Tray menu is back
 + Asset download
++ Updater status/version
 )"
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version := "0.232"
+Version := "0.233"
 VersionTitle := "AHK v2"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -144,7 +145,7 @@ if(SettingsTAB)
     myGui.Add("GroupBox", "x8 y122 w175 h160", "Settings for this script.")
     ogcCheckBoxKeepthisalwaysontop := myGui.Add("CheckBox", "x16 y144 w143 h23", "Keep this always on top")
     ogcCheckBoxKeepthisalwaysontop.OnEvent("Click", KeepThisAlwaysOnTop.Bind("Normal"))
-    ogcOnExitCloseToTrayCheckbox := myGui.Add("CheckBox", "x16 y168 w140 h23  vOnExitCloseToTrayCheckbox +Disabled", "On Exit close to tray")
+    ogcOnExitCloseToTrayCheckbox := myGui.Add("CheckBox", "x16 y168 w140 h23  vOnExitCloseToTrayCheckbox", "On Exit close to tray")
     ogcOnExitCloseToTrayCheckbox.OnEvent("Click", OnExitCloseToTray.Bind("Normal"))
     ogcButtonRedownloadassets := myGui.Add("Button", "x16 y192 w133 h28", "Redownload assets")
     ogcButtonRedownloadassets.OnEvent("Click", RedownloadAssets.Bind("Normal"))
@@ -170,10 +171,11 @@ if(SettingsTAB)
     ogcButtonUninstall := myGui.Add("Button", "x16 y464 w103 h23 +Disabled", "Uninstall")
     ;Updates
     myGui.SetFont()
-    myGui.Add("GroupBox", "x648 y392 w179 h117", "Updates")
+    myGui.Add("GroupBox", "x648 y400 w179 h110", "Updates")
     myGui.SetFont("s15")
-    myGui.Add("Text", "x664 y472 w158 h28 +0x200", "Version = " . Version)
+    myGui.Add("Text", "x664 y463 w158 h23 +0x200", "Version = " . Version)
     myGui.SetFont()
+    ogcTextUpdaterVersion := myGui.Add("Text", "x664 y488 w158 h18 +0x200", "Updater missing")
     ogcCheckUpdatesOnStartup := myGui.Add("CheckBox", "x656 y416 w169 h23 vCheckUpdatesOnStartup", "Check for updates on startup")
     ogcCheckUpdatesOnStartup.OnEvent("Click", AutoUpdates.Bind("Normal"))
     ogcButtonCheckforupdates := myGui.Add("Button", "x672 y440 w128 h23", "Check for updates")
@@ -192,7 +194,7 @@ if(FileExist(AppSettingsIni))
 {
     ;Close To tray
     Temp_CloseToTray := IniRead(AppSettingsIni, "Settings", "CloseToTray", False)
-    if(Temp_CloseToTray == true)
+    if(Temp_CloseToTray)
     {
         CloseToTray := true
         ogcOnExitCloseToTrayCheckbox.Value := 1
@@ -206,6 +208,22 @@ if(FileExist(AppSettingsIni))
         {
             Run("*RunAs " A_ScriptFullPath)
             ExitApp()
+        }
+    }
+}
+;Updater
+if(FileExist(AppUpdaterFile))
+{
+    ogcTextUpdaterVersion.Text := ""
+    TextFile := FileRead(AppUpdaterFile)
+    loop Parse TextFile, "`n"
+    {
+        if(A_Index == 9)
+        {
+            text := StrReplace(A_LoopField, '"')
+            text := StrReplace(text, ':')
+            ogcTextUpdaterVersion.Text := text
+            break
         }
     }
 }
@@ -232,11 +250,11 @@ Return
 ;//////////////[GUI/Tray Actions]///////////////
 GuiEscape(*)
 {
-    ExitApp()
+    GuiClose(CloseToTray)
 }
-GuiClose(*)
+GuiClose(ToTray)
 {
-    if(CloseToTray)
+    if(ToTray)
     {
         myGui.Hide()
     }
@@ -356,11 +374,7 @@ KeepThisAlwaysOnTop(A_GuiEvent, GuiCtrlObj, Info, *)
 OnExitCloseToTray(A_GuiEvent, GuiCtrlObj, Info, *)
 {
     CreateDefaultDirectories()
-    oSaved := myGui.Submit("0")
-    RunAsThisAdminCheckbox := oSaved.RunAsThisAdminCheckbox
-    OnExitCloseToTrayCheckbox := oSaved.OnExitCloseToTrayCheckbox
-    CheckUpdatesOnStartup := oSaved.CheckUpdatesOnStartup
-    if(OnExitCloseToTrayCheckbox)
+    if(ogcOnExitCloseToTrayCheckbox.Value == 1)
     {
         CloseToTray := true
         IniWrite("true", AppSettingsIni, "Settings", "CloseToTray")
