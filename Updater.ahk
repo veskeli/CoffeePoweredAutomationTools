@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.46"
+UpdaterVersion := "0.461"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -66,8 +66,8 @@ if FileExist(AppUpdaterSettingsFile)
     global version
     global MainScriptFile
     global MainScriptBranch
-    if(MainScriptFile == 0 || MainScriptBranch == "0")
-        MainScriptFile := "main"
+    if(MainScriptBranch == 0 || MainScriptBranch == "0")
+        MainScriptBranch := "main"
     FileDelete(AppUpdaterSettingsFile)
 
     if(BRedownloadAssets)
