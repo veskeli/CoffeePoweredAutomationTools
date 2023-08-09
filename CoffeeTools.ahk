@@ -29,11 +29,12 @@ Changelog:
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version := "0.24"
+Version := "0.241"
 VersionTitle := "Plugin Support"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
 AppFolder := A_AppData . "\" . AppFolderName
+AppPluginsFolder := AppFolder . "\Plugins"
 AppSettingsFolder := AppFolder . "\Settings"
 AppUpdaterFile := AppFolder . "\Updater.ahk"
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
@@ -56,6 +57,7 @@ AppPreVersionsIni := AppFolder . "\temp\PreVersions.ini"
 ;AppOtherScriptsIni := AppOtherScriptsFolder . "\OtherScripts.ini"
 ;//////////////[Text]///////////////
 RandomCoffeeQuotesFile := AppSettingsFolder . "\RandomCoffeeQuotes.txt"
+LoadedPluginsFile := AppSettingsFolder . "\LoadedPlugins.txt"
 ;//////////////[Global variables]///////////////
 global Version
 global ScriptName
@@ -96,6 +98,22 @@ if(OtherScriptsTAB)
     TabHandle := "Other Scripts"
 if(WindowsTAB)
     TabHandle := "Windows"
+if(PluginsLoaded) ;Add plugins to tabs
+{
+    if(FileExist(LoadedPluginsFile))
+    {
+        PluginFile := FileRead(LoadedPluginsFile)
+        loop parse, PluginFile, "`n"
+        {
+            PluginName := StrReplace(A_LoopField,".ahk")
+            TabHandle.Push(PluginName)
+        }
+    }
+    else
+    {
+        PluginsLoaded := false
+    }
+}
 Tab := myGui.Add("Tab3", "x0 y0 w898 h640", TabHandle)
 UpdateTrayicon()
 ;________________________________________________________________________________________________________________________
@@ -191,8 +209,11 @@ if(SettingsTAB)
     ogcButtonCheckforupdates := myGui.Add("Button", "x672 y440 w128 h23", "Check for updates")
     ogcButtonCheckforupdates.OnEvent("Click", ButtonCheckForUpdates.Bind("Normal"))
 }
+if(PluginsLoaded)
+{
 ;<---Start_Include--->
 ;<---End_Include--->
+}
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Check Before Opening Script]///////////////
