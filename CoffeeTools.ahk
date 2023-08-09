@@ -255,9 +255,13 @@ if(FileExist(AppSettingsIni))
 ;//////////////[Show Gui]///////////////
 RandomCoffeeText := GetRandomCoffeeFact()
 if(PluginsLoaded)
+{
     TitleText := "Coffee Tools W/Plugins | " . Version . " | " . VersionTitle . " | Alpha | " . RandomCoffeeText
+}
 else
+{
     TitleText := "Coffee Tools | " . Version . " | " . VersionTitle . " | Alpha | " . RandomCoffeeText
+}
 myGui.Title := TitleText
 myGui.Show("w835 h517")
 Return
