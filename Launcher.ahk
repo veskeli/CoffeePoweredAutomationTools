@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Launcher]///////////////
-Launcherersion := "0.1"
+Launcherersion := "0.11"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -109,7 +109,7 @@ if(BuildApp)
             MainFileEnd := A_LoopField
             continue
         }
-        else if(InStr(A_LoopField,"PluginsLoaded"))
+        else if(InStr(A_LoopField,"PluginsLoaded :="))
         {
             MainFileStart := MainFileStart . "`n" . "PluginsLoaded := true"
         }
