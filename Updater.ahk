@@ -6,21 +6,22 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.461"
+UpdaterVersion := "0.47"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
 global ProgressBarVisible
 ;____________________________________________________________
 ;//////////////[Folders]///////////////
-ScriptName := "CoffeeTools"
-AppFolderName := "CoffeePoweredAutomationTools"
-AppFolder := A_AppData . "\" . AppFolderName
-AppSettingsFolder := AppFolder . "\Settings"
-MainScriptFile := AppFolder . "\" . ScriptName
-MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
-AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
+global ScriptName := "CoffeeTools"
+global AppFolderName := "CoffeePoweredAutomationTools"
+global AppFolder := A_AppData . "\" . AppFolderName
+global AppSettingsFolder := AppFolder . "\Settings"
+global MainScriptFile := AppFolder . "\" . ScriptName
+global MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
+global LauncherAhkFile := AppFolder . "\Launcher.ahk"
 ;//////////////[ini]///////////////
+AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
 AppSettingsIni := AppSettingsFolder . "\Settings.ini"
 ;//////////////[Assets]///////////////
 RandomCoffeeQuotesFile := AppSettingsFolder . "\RandomCoffeeQuotes.txt"
@@ -37,7 +38,6 @@ ShortcutState := "1"
 AppInstallLocation := ""
 MainScriptBranch := "main"
 ;Global
-global MainScriptAhkFile
 global ShowRunningLatestMessage
 global GithubReposityLink
 global MainScriptBranch
@@ -211,6 +211,8 @@ RedownloadAssets()
     ;Delete old assets
     if(FileExist(RandomCoffeeQuotesFile))
         FileDelete(RandomCoffeeQuotesFile)
+    if(FileExist(LauncherAhkFile))
+        FileDelete(LauncherAhkFile)
     ;Download Assets
     SetProgressBarText("Downloading assets")
     SetProgressBarState(50)
@@ -223,6 +225,8 @@ DownloadAssets()
 {
     if(!FileExist(RandomCoffeeQuotesFile))
         Download(GithubReposityLink . MainScriptBranch . "/Other/texts/RandomCoffeeQuotes.txt",RandomCoffeeQuotesFile)
+    if(!FileExist(LauncherAhkFile))
+        Download(GithubReposityLink . MainScriptBranch . "/Launcher.ahk" ,LauncherAhkFile)
     SetProgressBarState(100)
 }
 ;____________________________________________________________
