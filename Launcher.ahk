@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Launcher]///////////////
-Launcherersion := "0.11"
+Launcherersion := "0.12"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -140,7 +140,11 @@ if(BuildApp)
     ;Add Main Start
     NewFile := NewFile . "`n" . MainFileStart
     ;Add Include Menu Elements
-    NewFile := NewFile . "`n" . 'MsgBox("Plugins loaded")'
+    for plugin in Temp_Plugins
+    {
+        pluginGui := StrReplace(plugin,".ahk")
+        NewFile := NewFile . "`n" . pluginGui . "LoadTab()"
+    }
     ;Add Main End
     NewFile := NewFile . "`n" . MainFileEnd
     ;Create File
