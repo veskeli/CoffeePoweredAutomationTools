@@ -29,7 +29,7 @@ Changelog:
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.242"
+Version := "0.243"
 ;//////////////[Folders]///////////////
 VersionTitle := "Plugin Support"
 ScriptName := "CoffeeTools"
@@ -40,6 +40,7 @@ AppSettingsFolder := AppFolder . "\Settings"
 AppUpdaterFile := AppFolder . "\Updater.ahk"
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
 LauncherAhkFile := AppFolder . "\Launcher.ahk"
+MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
 ;//////////////[Variables]///////////////
 CurrentScriptBranch := "main"
 CloseToTray := false
@@ -183,6 +184,10 @@ if(SettingsTAB)
     ogcButtonShowChangelog.OnEvent("Click", ShowChangelogButton.Bind("Normal"))
     ogcButtonRunWithPlugins := myGui.Add("Button", "x16 y252 w133 h23", "Run with plugins")
     ogcButtonRunWithPlugins.OnEvent("Click",RunWithPlugins.Bind("Normal"))
+    if(PluginsLoaded)
+    {
+        ogcButtonRunWithPlugins.Text := "Run without plugins"
+    }
     ;Debug
     myGui.SetFont()
     myGui.Add("GroupBox", "x8 y295 w170 h123", "Debug")
@@ -379,6 +384,7 @@ RunAsThisAdminCheckboxButton(A_GuiEvent, GuiCtrlObj, Info, *)
 Shortcut_to_desktop(A_GuiEvent, GuiCtrlObj, Info, *)
 {
     MsgBox("Not Working yet", "", "T25")
+    ;TODO
     /*
     if(IsEXERunnerEnabled)
     {
@@ -454,15 +460,23 @@ ShowChangelogButton(A_GuiEvent, GuiCtrlObj, Info, *)
 }
 RunWithPlugins(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-    if(FileExist(LauncherAhkFile))
+    if(PluginsLoaded)
     {
-        Run(LauncherAhkFile)
+        Run(MainScriptAhkFile)
         ExitApp
     }
     else
     {
-        ;TODO Better msgbox
-        MsgBox("Launcher Missing!")
+        if(FileExist(LauncherAhkFile))
+        {
+            Run(LauncherAhkFile)
+            ExitApp
+        }
+        else
+        {
+            ;TODO Better msgbox
+            MsgBox("Launcher File Is Missing!")
+        }
     }
 }
 ;Debug
