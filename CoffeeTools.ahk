@@ -28,8 +28,9 @@ Changelog:
 )"
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
-;//////////////[Variables]///////////////
-Version := "0.241"
+;//////////////[Coffee Tools]///////////////
+Version := "0.242"
+;//////////////[Folders]///////////////
 VersionTitle := "Plugin Support"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -38,6 +39,8 @@ AppPluginsFolder := AppFolder . "\Plugins"
 AppSettingsFolder := AppFolder . "\Settings"
 AppUpdaterFile := AppFolder . "\Updater.ahk"
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
+LauncherAhkFile := AppFolder . "\Launcher.ahk"
+;//////////////[Variables]///////////////
 CurrentScriptBranch := "main"
 CloseToTray := false
 PluginsLoaded := false
@@ -114,7 +117,7 @@ if(PluginsLoaded) ;Add plugins to tabs
         PluginsLoaded := false
     }
 }
-Tab := myGui.Add("Tab3", "x0 y0 w898 h640", TabHandle)
+global Tab := myGui.Add("Tab3", "x0 y0 w898 h640", TabHandle)
 UpdateTrayicon()
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -178,8 +181,8 @@ if(SettingsTAB)
     ogcButtonRedownloadassets.OnEvent("Click", RedownloadAssets.Bind("Normal"))
     ogcButtonShowChangelog := myGui.Add("Button", "x16 y224 w133 h23", "Show Changelog")
     ogcButtonShowChangelog.OnEvent("Click", ShowChangelogButton.Bind("Normal"))
-    ogcButtonCustomizeTabs := myGui.Add("Button", "x16 y252 w133 h23", "Customize Tabs")
-    ogcButtonCustomizeTabs.OnEvent("Click",CustomizeTabs.Bind("Normal"))
+    ogcButtonRunWithPlugins := myGui.Add("Button", "x16 y252 w133 h23", "Run with plugins")
+    ogcButtonRunWithPlugins.OnEvent("Click",RunWithPlugins.Bind("Normal"))
     ;Debug
     myGui.SetFont()
     myGui.Add("GroupBox", "x8 y295 w170 h123", "Debug")
@@ -448,6 +451,19 @@ RedownloadAssets(*)
 ShowChangelogButton(A_GuiEvent, GuiCtrlObj, Info, *)
 {
     ShowChangelogMsgBox(Changelog)
+}
+RunWithPlugins(A_GuiEvent, GuiCtrlObj, Info, *)
+{
+    if(FileExist(LauncherAhkFile))
+    {
+        Run(LauncherAhkFile)
+        ExitApp
+    }
+    else
+    {
+        ;TODO Better msgbox
+        MsgBox("Launcher Missing!")
+    }
 }
 ;Debug
 OpenScriptFolder(A_GuiEvent, GuiCtrlObj, Info, *)
