@@ -1,3 +1,4 @@
+;<---#Include--->
 #Requires AutoHotkey v2.0+
 #SingleInstance Force
 KeyHistory(0)
@@ -23,12 +24,13 @@ Changelog:
 + Tray menu is back
 + Asset download
 + Updater status/version
++ Plugins
 )"
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Variables]///////////////
-Version := "0.233"
-VersionTitle := "AHK v2"
+Version := "0.24"
+VersionTitle := "Plugin Support"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
 AppFolder := A_AppData . "\" . AppFolderName
@@ -37,6 +39,7 @@ AppUpdaterFile := AppFolder . "\Updater.ahk"
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
 CurrentScriptBranch := "main"
 CloseToTray := false
+PluginsLoaded := false
 ;//////////////[Tabs]///////////////
 HomeTAB := true
 SettingsTAB := true
@@ -117,6 +120,9 @@ if(HomeTAB)
     ;Always on top
     ;myGui.SetFont()
     ;myGui.Add("GroupBox", "x8 y152 w300 h62", "Toggle any application to Always on top by hotkey")
+    ;Customize Tabs
+    ogcButtonCustomizeTabs := myGui.Add("Button", "x368 y24 w101 h23", "Plugin Manager")
+    ogcButtonCustomizeTabs.OnEvent("Click",CustomizeTabs.Bind("Normal"))
 }
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -136,6 +142,9 @@ if(SettingsTAB)
     myGui.Add("GroupBox", "x182 y31 w120 h63", "Shortcut")
     ogcButtonShortcuttoDesktop := myGui.Add("Button", "x192 y48 w95 h35 +Disabled", "Shortcut to Desktop")
     ogcButtonShortcuttoDesktop.OnEvent("Click", Shortcut_to_desktop.Bind("Normal"))
+    ;Customize Tabs
+    ogcButtonCustomizeTabs := myGui.Add("Button", "x368 y24 w101 h23", "Plugin Manager")
+    ogcButtonCustomizeTabs.OnEvent("Click",CustomizeTabs.Bind("Normal"))
     ;Report an issue
     myGui.SetFont("s15")
     ogcButtonReportanissueorbug := myGui.Add("Button", "x624 y32 w206 h35", "Report an issue or bug")
@@ -151,7 +160,8 @@ if(SettingsTAB)
     ogcButtonRedownloadassets.OnEvent("Click", RedownloadAssets.Bind("Normal"))
     ogcButtonShowChangelog := myGui.Add("Button", "x16 y224 w133 h23", "Show Changelog")
     ogcButtonShowChangelog.OnEvent("Click", ShowChangelogButton.Bind("Normal"))
-    ogcButtonCustomizeTabs := myGui.Add("Button", "x16 y252 w133 h23 +Disabled", "Customize Tabs")
+    ogcButtonCustomizeTabs := myGui.Add("Button", "x16 y252 w133 h23", "Customize Tabs")
+    ogcButtonCustomizeTabs.OnEvent("Click",CustomizeTabs.Bind("Normal"))
     ;Debug
     myGui.SetFont()
     myGui.Add("GroupBox", "x8 y295 w170 h123", "Debug")
@@ -181,6 +191,8 @@ if(SettingsTAB)
     ogcButtonCheckforupdates := myGui.Add("Button", "x672 y440 w128 h23", "Check for updates")
     ogcButtonCheckforupdates.OnEvent("Click", ButtonCheckForUpdates.Bind("Normal"))
 }
+;<---Start_Include--->
+;<---End_Include--->
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Check Before Opening Script]///////////////
@@ -218,7 +230,7 @@ if(FileExist(AppUpdaterFile))
     TextFile := FileRead(AppUpdaterFile)
     loop Parse TextFile, "`n"
     {
-        if(A_Index == 9)
+        if(InStr(A_LoopField,"UpdaterVersion"))
         {
             text := StrReplace(A_LoopField, '"')
             text := StrReplace(text, ':')
@@ -242,7 +254,11 @@ if(FileExist(AppSettingsIni))
 ;________________________________________________________________________________________________________________________
 ;//////////////[Show Gui]///////////////
 RandomCoffeeText := GetRandomCoffeeFact()
-myGui.Title := "Coffee Tools | " . Version . " | " . VersionTitle . " | Alpha | " . RandomCoffeeText
+if(PluginsLoaded)
+    TitleText := "Coffee Tools W/Plugins | " . Version . " | " . VersionTitle . " | Alpha | " . RandomCoffeeText
+else
+    TitleText := "Coffee Tools | " . Version . " | " . VersionTitle . " | Alpha | " . RandomCoffeeText
+myGui.Title := TitleText
 myGui.Show("w835 h517")
 Return
 ;________________________________________________________________________________________________________________________
@@ -250,11 +266,11 @@ Return
 ;//////////////[GUI/Tray Actions]///////////////
 GuiEscape(*)
 {
-    GuiClose(CloseToTray)
+    GuiClose()
 }
-GuiClose(ToTray)
+GuiClose(*)
 {
-    if(ToTray)
+    if(CloseToTray)
     {
         myGui.Hide()
     }
@@ -275,7 +291,6 @@ OpenMainGui(A_ThisMenuItem, A_ThisMenuItemPos, MyMenu)
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Home]///////////////
-
 RunIpConfig(A_GuiEvent, GuiCtrlObj, Info, *)
 {
 RunWait(A_ComSpec " /k ipconfig")
@@ -361,6 +376,11 @@ Shortcut_to_desktop(A_GuiEvent, GuiCtrlObj, Info, *)
     }
     */
 }
+;Customize Tabs
+CustomizeTabs(A_GuiEvent, GuiCtrlObj, Info, *)
+{
+    MsgBox("Not Working yet")
+}
 ;Report an issue
 ReportAnIssueOrBug(A_GuiEvent, GuiCtrlObj, Info, *)
 {
@@ -376,13 +396,13 @@ OnExitCloseToTray(A_GuiEvent, GuiCtrlObj, Info, *)
     CreateDefaultDirectories()
     if(ogcOnExitCloseToTrayCheckbox.Value == 1)
     {
-        CloseToTray := true
-        IniWrite("true", AppSettingsIni, "Settings", "CloseToTray")
+        global CloseToTray := true
+        IniWrite("1", AppSettingsIni, "Settings", "CloseToTray")
     }
     else
     {
-        CloseToTray := false
-        IniWrite("false", AppSettingsIni, "Settings", "CloseToTray")
+        global CloseToTray := false
+        IniWrite("0", AppSettingsIni, "Settings", "CloseToTray")
     }
 }
 RedownloadAssets(*)
