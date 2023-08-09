@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Launcher]///////////////
-Launcherersion := "0.12"
+Launcherersion := "0.13"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -17,6 +17,7 @@ MainScriptFile := AppFolder . "\" . ScriptName
 MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
 MainScriptAhkFileWithPlugins := AppFolder . "\" . ScriptName . "WithPlugins.ahk"
+LauncherAhkFile := AppFolder . "\Launcher.ahk"
 ;//////////////[ini]///////////////
 LoadedPluginsFile := AppSettingsFolder . "\LoadedPlugins.txt"
 ;//////////////[Global]///////////////
@@ -44,7 +45,7 @@ if(IsEmpty)
     goto RunApp
 }
 ;Check for loaded plugins
-if(FileExist(LoadedPluginsFile))
+if(FileExist(LoadedPluginsFile) && True == False)
 {
     TextFile := FileRead(LoadedPluginsFile)
     loop parse TextFile, "`n"
@@ -102,6 +103,7 @@ if(BuildApp)
     MainFileStart := ""
     MainFileEnd := ""
     SaveToStart := true
+    ChangedPluginVariable := false
     loop parse, MainFile, "`n"
     {
         if(InStr(A_LoopField,"<---End_Include--->"))
@@ -109,9 +111,10 @@ if(BuildApp)
             MainFileEnd := A_LoopField
             continue
         }
-        else if(InStr(A_LoopField,"PluginsLoaded :="))
+        else if(InStr(A_LoopField,"PluginsLoaded :=") && !ChangedPluginVariable)
         {
             MainFileStart := MainFileStart . "`n" . "PluginsLoaded := true"
+            ChangedPluginVariable := true
         }
         else if(InStr(A_LoopField,"<---Start_Include--->"))
         {
@@ -149,6 +152,22 @@ if(BuildApp)
     NewFile := NewFile . "`n" . MainFileEnd
     ;Create File
     FileAppend(NewFile,MainScriptAhkFileWithPlugins)
+    ;Add loaded plugins to file
+    LoadedPluginsText := ""
+    for plugin in Temp_Plugins
+    {
+        if(A_Index == 1)
+        {
+            LoadedPluginsText := plugin
+        }
+        else
+        {
+            LoadedPluginsText := LoadedPluginsText . "`n" . plugin
+        }
+    }
+    if(FileExist(LoadedPluginsFile))
+        FileDelete(LoadedPluginsFile)
+    FileAppend(LoadedPluginsText,LoadedPluginsFile)
 }
 ;Run app
 RunApp:
