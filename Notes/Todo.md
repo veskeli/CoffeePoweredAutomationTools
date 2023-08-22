@@ -39,6 +39,7 @@
 	- [ ] Read settings
 		- [ ] Auto install
 - [ ] Update all tabs and scripts independently
+- [ ] Better self update
 - Currently Auto updates itself
 - Currently asks installer and main script updates
 - - -

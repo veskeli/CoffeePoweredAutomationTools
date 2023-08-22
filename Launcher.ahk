@@ -6,7 +6,10 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Launcher]///////////////
-Launcherersion := "0.13"
+LauncherVersion := "0.14"
+
+
+
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -18,14 +21,23 @@ MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
 MainScriptAhkFileWithPlugins := AppFolder . "\" . ScriptName . "WithPlugins.ahk"
 LauncherAhkFile := AppFolder . "\Launcher.ahk"
+
+
+
 ;//////////////[ini]///////////////
 LoadedPluginsFile := AppSettingsFolder . "\LoadedPlugins.txt"
+
+
+
 ;//////////////[Global]///////////////
-global Launcherersion
+global LauncherVersion
 global AppFolderName
 global AppFolder
 global AppSettingsFolder
 global MainScriptAhkFileWithPlugins
+
+
+
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Run]///////////////
@@ -42,7 +54,7 @@ loop files, AppPluginsFolder . "\*.ahk"
 ;if no plugins skip to run
 if(IsEmpty)
 {
-    goto RunApp
+    goto RunDefault
 }
 ;Check for loaded plugins
 if(FileExist(LoadedPluginsFile) && True == False)
@@ -180,3 +192,8 @@ else
     Run(MainScriptAhkFile) ;Run script (Safe mode)
 }
 ExitApp
+RunDefault:
+{
+    Run(MainScriptAhkFile) ;Run script (Safe mode)
+    ExitApp
+}
