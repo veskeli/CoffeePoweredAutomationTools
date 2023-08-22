@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.5"
+UpdaterVersion := "0.51"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -44,6 +44,8 @@ global ShowRunningLatestMessage
 global GithubReposityLink
 global MainScriptBranch
 global UserCanceledUpdate := false
+global SkipRunningLatestMessage := false
+
 
 
 ;//////////////[Main update files]///////////////
@@ -72,6 +74,8 @@ if FileExist(AppUpdaterSettingsFile) ;Read Settings
 {
     ;Redownload Assets
     BRedownloadAssets := IniRead(AppUpdaterSettingsFile, "Options", "RedownloadAssets", False)
+    ;Show Running Latest Message
+    global SkipRunningLatestMessage := IniRead(AppUpdaterSettingsFile, "Options", "SkipRunningLatestMessage", False)
 
     FileDelete(AppUpdaterSettingsFile) ;Delete settings file
 
@@ -304,7 +308,7 @@ StartProgressBar(CustomSteps := 0)
     }
     else
     {
-        if(UserCanceledUpdate)
+        if(UserCanceledUpdate or SkipRunningLatestMessage)
             return
         ;[TODO] Better msg
         DetailedMessage := ""

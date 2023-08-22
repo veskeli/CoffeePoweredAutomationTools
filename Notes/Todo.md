@@ -31,6 +31,8 @@
 	- [ ] Manage Branches
 	- [ ] Manage all scripts (Main script, Updater and Launcher)
 		- [x] Basic
+		- [ ] Check and notify if not files found
+			- If not found ask for redownload
 	- [ ] Better message box
 	- [x] Ask to download update
 - [ ] Plugin updater
