@@ -2,7 +2,7 @@
 > This site is working progress.
 > Links and text may not be correct!
 # Coffee Powered Automation Tools
-##### (CoffeeTools)
+##### CoffeeTools
 - - -
 >[!IMPORTANT]
 >Auto Hotkey 2.0 Or above required
