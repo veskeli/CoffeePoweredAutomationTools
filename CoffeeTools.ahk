@@ -17,9 +17,8 @@ Persistent
 ;//////////////[Changelog]///////////////
 Changelog := "
 (
-Changelog:
+0.2+ Changelog:
 + AHK v2
-+ Fixing and enabling settings
 + Coffee quotes are back (282 Coffee quotes)
 + Tray menu is back
 + Asset download
@@ -29,7 +28,7 @@ Changelog:
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.243"
+Version := "0.244"
 ;//////////////[Folders]///////////////
 VersionTitle := "Plugin Support"
 ScriptName := "CoffeeTools"
@@ -142,9 +141,6 @@ if(HomeTAB)
     ;Always on top
     ;myGui.SetFont()
     ;myGui.Add("GroupBox", "x8 y152 w300 h62", "Toggle any application to Always on top by hotkey")
-    ;Customize Tabs
-    ogcButtonCustomizeTabs := myGui.Add("Button", "x368 y24 w101 h23", "Plugin Manager")
-    ogcButtonCustomizeTabs.OnEvent("Click",CustomizeTabs.Bind("Normal"))
 }
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -164,9 +160,9 @@ if(SettingsTAB)
     myGui.Add("GroupBox", "x182 y31 w120 h63", "Shortcut")
     ogcButtonShortcuttoDesktop := myGui.Add("Button", "x192 y48 w95 h35 +Disabled", "Shortcut to Desktop")
     ogcButtonShortcuttoDesktop.OnEvent("Click", Shortcut_to_desktop.Bind("Normal"))
-    ;Customize Tabs
+    ;Plugin Manager
     ogcButtonCustomizeTabs := myGui.Add("Button", "x368 y24 w101 h23", "Plugin Manager")
-    ogcButtonCustomizeTabs.OnEvent("Click",CustomizeTabs.Bind("Normal"))
+    ogcButtonCustomizeTabs.OnEvent("Click",CustomizePlugins.Bind("Normal"))
     ;Report an issue
     myGui.SetFont("s15")
     ogcButtonReportanissueorbug := myGui.Add("Button", "x624 y32 w206 h35", "Report an issue or bug")
@@ -276,7 +272,7 @@ if(FileExist(AppSettingsIni))
     ogcCheckUpdatesOnStartup.Value := Temp_CheckUpdatesOnStartup
     if(Temp_CheckUpdatesOnStartup == 1)
     {
-        CheckForUpdates(False)
+        CheckForUpdates(true)
     }
 }
 ;________________________________________________________________________________________________________________________
@@ -410,10 +406,11 @@ Shortcut_to_desktop(A_GuiEvent, GuiCtrlObj, Info, *)
     }
     */
 }
-;Customize Tabs
-CustomizeTabs(A_GuiEvent, GuiCtrlObj, Info, *)
+;Plugin Manager
+CustomizePlugins(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-    MsgBox("Not Working yet")
+    PluginManagerInt()
+    PluginManagerGui.Show()
 }
 ;Report an issue
 ReportAnIssueOrBug(A_GuiEvent, GuiCtrlObj, Info, *)
@@ -540,7 +537,7 @@ AutoUpdates(A_GuiEvent, GuiCtrlObj, Info, *)
 }
 ButtonCheckForUpdates(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-    CheckForUpdates(True)
+    CheckForUpdates(false)
 }
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -596,7 +593,10 @@ NotAdminError(T_CustomMessage := "")
         }
     }
 }
-CheckForUpdates(ShowRunningLatestMessage)
+/**
+ * @param SkipRunningLatestMessage Skip Running Latest Message
+**/
+CheckForUpdates(SkipRunningLatestMessage)
 {
     if(!FileExist(AppUpdaterFile))
     {
@@ -606,10 +606,7 @@ CheckForUpdates(ShowRunningLatestMessage)
     }
     else
     {
-        IniWrite(Version, AppUpdaterSettingsFile, "Options", "Version")
-        IniWrite(A_ScriptFullPath, AppUpdaterSettingsFile, "Options", "ScriptFullPath")
-        IniWrite(CurrentScriptBranch, AppUpdaterSettingsFile, "Options", "Branch")
-        IniWrite(ShowRunningLatestMessage, AppUpdaterSettingsFile, "Options", "ShowRunningLatestMessage")
+        IniWrite(SkipRunningLatestMessage, AppUpdaterSettingsFile, "Options", "SkipRunningLatestMessage")
 
         Run(AppUpdaterFile)
     }
@@ -652,4 +649,16 @@ FileOrFolderMissing(IsFolder)
     {
         MsgBox("File does not exist.","File Missing","T20")
     }
+}
+PluginManagerInt()
+{
+    global PluginManagerGui := Gui()
+    PluginManagerGui.Add("Text", "x8 y8 w73 h23 +0x200", "Plugin name:")
+    PluginManagerGui.Add("Text", "x8 y40 w395 h2 +0x10")
+    ;Plugins here
+    PluginManagerGui.Add("Text", "x8 y48 w207 h23 +0x200", "Plugin")
+    ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y48 w80 h23 +Disabled", "Settings")
+    ogcButtonInstall := PluginManagerGui.Add("Button", "x312 y48 w80 h23", "Install")
+    PluginManagerGui.OnEvent('Close', (*) => PluginManagerGui.Destroy())
+    PluginManagerGui.Title := "Plugin Manager"
 }
