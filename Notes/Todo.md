@@ -27,18 +27,23 @@
 ## Updater
 - [x] Basic updater
 - [x] New workflow
-- [ ] Manage Branches
-- [ ] Ask to download update
+	- [x] Check/Read version from script file
+	- [ ] Manage Branches
+	- [ ] Manage all scripts (Main script, Updater and Launcher)
+		- [x] Basic
+	- [ ] Better message box
+	- [x] Ask to download update
 - [ ] Plugin updater
 	- [ ] Basic Download and update
 	- [ ] Ask to install
 	- [ ] Read settings
 		- [ ] Auto install
 - [ ] Update all tabs and scripts independently
-- (Currently Auto updates itself and installer)
+- Currently Auto updates itself
+- Currently asks installer and main script updates
 - - -
 ## Installer
-- [ ] 
+- [x] Basic
 - - -
 ## Plugins
 - [ ] Better Clipboard

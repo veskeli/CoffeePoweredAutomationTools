@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.47"
+UpdaterVersion := "0.5"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -27,6 +27,7 @@ AppSettingsIni := AppSettingsFolder . "\Settings.ini"
 RandomCoffeeQuotesFile := AppSettingsFolder . "\RandomCoffeeQuotes.txt"
 ;//////////////[Update]///////////////
 AppUpdateFile := AppFolder . "\temp\Updater.ahk"
+AppTempFolder := AppFolder . "\temp"
 ShowRunningLatestMessage := True
 ;//////////////[Links]///////////////
 GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/"
@@ -37,10 +38,19 @@ FixUserLocation := "false"
 ShortcutState := "1"
 AppInstallLocation := ""
 MainScriptBranch := "main"
-;Global
+;//////////////[Variable]///////////////
+global ProgressBarStepSize := 50
 global ShowRunningLatestMessage
 global GithubReposityLink
 global MainScriptBranch
+global UserCanceledUpdate := false
+
+
+;//////////////[Main update files]///////////////
+;Main Script
+global ScriptUpdate := false
+;Launcher
+global LauncherUpdate := false
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Progress Bar]///////////////
@@ -52,111 +62,80 @@ ogcButtonCancel := oGui2.Add("Button", "+Disabled x144 y72 w80 h23", "Cancel")
 ogcButtonCancel.OnEvent("Click", GuiEscape.Bind("Normal"))
 oGui2.OnEvent("Close", GuiEscape)
 oGui2.OnEvent("Escape", GuiEscape)
+
+
+
 ;____________________________________________________________
 ;____________________________________________________________
-;//////////////[Update Script]///////////////
-if FileExist(AppUpdaterSettingsFile)
+;//////////////[Check for redownload assets]///////////////
+if FileExist(AppUpdaterSettingsFile) ;Read Settings
 {
+    ;Redownload Assets
     BRedownloadAssets := IniRead(AppUpdaterSettingsFile, "Options", "RedownloadAssets", False)
-    version := IniRead(AppUpdaterSettingsFile, "Options", "Version", False)
-    MainScriptFile := IniRead(AppUpdaterSettingsFile, "Options", "ScriptFullPath", False)
-    MainScriptBranch := IniRead(AppUpdaterSettingsFile, "Options", "Branch", False)
-    ShowRunningLatestMessage := IniRead(AppUpdaterSettingsFile, "Options", "ShowRunningLatestMessage", False)
-    global BRedownloadAssets
-    global version
-    global MainScriptFile
-    global MainScriptBranch
-    if(MainScriptBranch == 0 || MainScriptBranch == "0")
-        MainScriptBranch := "main"
-    FileDelete(AppUpdaterSettingsFile)
+
+    FileDelete(AppUpdaterSettingsFile) ;Delete settings file
 
     if(BRedownloadAssets)
     {
         RedownloadAssets()
     }
-    else
-    {
-        TryUpdateScript(true,MainScriptBranch)
-    }
 }
-Else
+
+
+
+;//////////////[Check for updates]///////////////
+MainScriptBranch := "main" ;[TODO] Brach control
+;MainScript
+global MainScriptVersion := ReadVersionFromAhkFile("Version",MainScriptAhkFile)
+global NewMainScriptVersion := GetNewVersionFromGithub(MainScriptBranch,"/Version/CoffeePoweredAutomationToolsVersion.txt")
+if(MainScriptVersion != "")
 {
-    MsgBox("No pending updates...", "Updater", "T25")
-    /*
-    MsgBox, 4, Updater, No pending updates. Would you like to reinstall script?
-    IfMsgBox Yes
+    if(NewMainScriptVersion != "ERROR")
     {
-        UpdateScript(true,MainScriptBranch)
+        if(NewMainScriptVersion > MainScriptVersion)
+        {
+            ScriptUpdate := true
+        }
     }
-    */
 }
-CheckForUpdaterUpdates() ;[TODO] Not working
+;Launcher
+global LauncherVersion := ReadVersionFromAhkFile("LauncherVersion",LauncherAhkFile)
+global NewLauncherVersion := GetNewVersionFromGithub(MainScriptBranch,"/Version/LauncherVersion.txt")
+if(LauncherVersion != "")
+{
+    if(NewLauncherVersion != "ERROR")
+    {
+        if(NewLauncherVersion > LauncherVersion)
+        {
+            LauncherUpdate := true
+        }
+    }
+}
+
+
+
+;//////////////[Ask for main script updates]///////////////
+if(ScriptUpdate)
+    ScriptUpdate := AskToDownloadUpdates("Coffee Tools",MainScriptVersion,NewMainScriptVersion)
+if(LauncherUpdate)
+    LauncherUpdate := AskToDownloadUpdates("Launcher",LauncherVersion,NewLauncherVersion)
+
+
+
+;Update Files
+UpdateMainFiles(MainScriptBranch)
+
+
+
+;//////////////[Updater Updates]///////////////
+CheckForUpdaterUpdates()
+
+
+
 ExitApp()
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Update Main File]///////////////
-TryUpdateScript(T_CheckForUpdates,T_Branch)
-{
-    if(T_Branch == "main" or T_Branch == "Experimental" or T_Branch == "PreRelease")  ;Check that branch is correctly typed
-    {
-        newversion := GetNewVersion(T_Branch,"/Version/CoffeePoweredAutomationToolsVersion.txt")
-        if(newversion == "ERROR" or newversion == "")
-        {
-            MsgBox("New Version Error!`nError while getting new version", "Update ERROR!", "T15")
-            return
-        }
-        if(T_CheckForUpdates) ;If normal Check and update
-        {
-            if(newversion > version)
-            {
-                if(T_Branch == "main")
-                {
-                    UpdateText := "New version is: " . newversion . "`nOld is: " . version .  "`nUpdate now?"
-                }
-                else if(T_Branch == "PreRelease")
-                {
-                    UpdateText := "New Pre-Release is: " . newversion . "`nOld is: " . version .  "`nUpdate now?"
-                }
-                else if(T_Branch == "Experimental")
-                {
-                    UpdateText := "New Experimental version is: " . newversion . "`nOld is: " . version .  "`nUpdate now?"
-                }
-                msgResult := MsgBox(UpdateText, "Update", 4)
-                if (msgResult = "Yes")
-                {
-                    StartUpdate(newversion,T_Branch)
-                }
-                Else
-                {
-                    return
-                }
-            }
-            Else
-            {
-                if(ShowRunningLatestMessage)
-                {
-                    MsgBox("Already latest version!", "Already latest version!", "T25")
-                }
-            }
-        }
-        else    ;Force update/Download
-        {
-            MsgBox("Force Download Called!?!")
-            ;TForceUpdate(newversion,T_Branch)
-        }
-    }
-    else
-    {
-        ExitApp()
-    }
-}
-;Activate Download
-StartUpdate(newversion,branch)
-{
-    CloseMainScript()
-    ;Update Script
-    UpdateScript(newversion,branch)
-}
 CloseMainScript()
 {
     ;Check That if script is running
@@ -168,38 +147,71 @@ CloseMainScript()
         WinClose()
     }
 }
-UpdateScript(newversion,branch) ;[TODO] Get correct file based on version (Currently gets latest from github)
+AskToDownloadUpdates(T_ScriptName,T_CurrentVersion,T_NewVersion,T_Branch := "main")
 {
-    ;Save branch
-    IniWrite(branch, AppSettingsIni, "Branch", "Instance1")
-    ;Set Progressbar
-    DownloadText := "Downloading new version: " . newversion
-    SetProgressBarText(DownloadText)
-    SetProgressBarState(5)
-    ;Delete old file
-    FileDelete(MainScriptFile)
-    SetProgressBarState(50)
-
-    DownloadLink := GithubReposityLink . branch . "/CoffeeTools.ahk"
-    SetProgressBarState(75)
-    ;Download new file
-    Download(DownloadLink,MainScriptFile)
-    SetProgressBarState(90)
-    ;Download Assets
-    DownloadAssets()
-    SetProgressBarState(100)
-    Loop
+    ;[TODO] Check for settings (Auto install)
+    UpdateText := "Update for " T_ScriptName "!`n`n"
+    if(T_Branch == "main")
     {
-        if (FileExist(MainScriptAhkFile))
-        {
-            ;Open New Script
-            Run(MainScriptAhkFile)
-            SetProgressBarState(-1) ;Just in case of idk
-            ExitApp()
-        }
+        UpdateText := UpdateText "New version is: " . T_CurrentVersion . "`nOld is: " . T_NewVersion .  "`nUpdate now?"
     }
-    SetProgressBarState(-1) ;Just in case of idk
-    ExitApp()
+    else if(T_Branch == "PreRelease")
+    {
+        UpdateText := UpdateText "New Pre-Release is: " . T_CurrentVersion . "`nOld is: " . T_NewVersion .  "`nUpdate now?"
+    }
+    else if(T_Branch == "Experimental")
+    {
+        UpdateText := UpdateText "New Experimental version is: " . T_CurrentVersion . "`nOld is: " . T_NewVersion .  "`nUpdate now?"
+    }
+    msgResult := MsgBox(UpdateText, "Update for " T_ScriptName "!", 4)
+    if (msgResult = "Yes")
+    {
+        global UserCanceledUpdate := false
+        return true
+    }
+    Else
+    {
+        global UserCanceledUpdate := true
+        return false
+    }
+    return false
+}
+;____________________________________________________________
+;____________________________________________________________
+;//////////////[Update Main Files]///////////////
+/**
+ * New workflow
+ *
+ * Uses these variables to update files:
+ * * ScriptUpdate
+ * * LauncherUpdate
+**/
+UpdateMainFiles(branch)
+{
+    StartProgressBar()
+    ;Download files
+    if(ScriptUpdate)
+        UpdateFileFromGithub(GithubReposityLink branch "/CoffeeTools.ahk",MainScriptAhkFile) ;Main script update
+    if(LauncherUpdate)
+        UpdateFileFromGithub(GithubReposityLink branch "/Launcher.ahk",LauncherAhkFile) ;Launcher update
+    SetProgressBarState(-1)
+}
+/**
+ * @param Link Link to file
+ * @param FilePath Path to file location
+**/
+UpdateFileFromGithub(Link,FilePath)
+{
+    ;Move existing file to temp
+    if(FileExist(FilePath))
+    {
+        SplitPath FilePath, &name
+        FileMove(FilePath,AppTempFolder "/" name,true)
+    }
+    ;Download new file
+    ;[TODO] Try and Catch
+    Download(Link,FilePath)
+    ProgressProgressBar()
 }
 ;____________________________________________________________
 ;//////////////[Assets]///////////////
@@ -233,7 +245,7 @@ DownloadAssets()
 ;//////////////[Updater updates]///////////////
 CheckForUpdaterUpdates()
 {
-    newversion := GetNewVersion(MainScriptBranch,"/Version/UpdaterVersion.txt")
+    newversion := GetNewVersionFromGithub(MainScriptBranch,"/Version/UpdaterVersion.txt")
     if(newversion == "ERROR")
     {
         ExitApp()
@@ -274,6 +286,43 @@ SetProgressBarState(State) ;Disable by setting "-1"
         }
     }
 }
+/**
+ * @param CustomSteps How many custom steps
+**/
+StartProgressBar(CustomSteps := 0)
+{
+    ProgressBarStepSize := 0
+    AllVars := CustomSteps
+    if(ScriptUpdate)
+        AllVars++
+    if(LauncherUpdate)
+        AllVars++
+    if(AllVars != 0)
+    {
+        ProgressBarStepSize := 100 / AllVars
+        SetProgressBarState(0)
+    }
+    else
+    {
+        if(UserCanceledUpdate)
+            return
+        ;[TODO] Better msg
+        DetailedMessage := ""
+        DetailedMessage := DetailedMessage "`nMain Script version: " MainScriptVersion " Newest: " NewMainScriptVersion
+        DetailedMessage := DetailedMessage "`nLauncher version: " LauncherVersion " Newest: " NewLauncherVersion
+        MsgBox("No updates found!`n`nDetailed:" DetailedMessage,"No updates found!")
+    }
+}
+/**
+ * Next step in progressbar
+**/
+ProgressProgressBar()
+{
+    SetProgressBarState(ogcDownloadProgressBar.Value + ProgressBarStepSize)
+}
+/**
+ * Only use in SetProgressBarState()
+**/
 OpenProgressWindow(State)
 {
     if(State)
@@ -292,6 +341,9 @@ SetProgressBarText(text)
 }
 ;____________________________________________________________
 ;//////////////[Functions]///////////////
+/**
+ * @param Link Link to text file
+**/
 ReadFileFromLink(Link)
 {
     try
@@ -308,7 +360,19 @@ ReadFileFromLink(Link)
     }
     return TResponse
 }
-GetNewVersion(T_Branch,linkEnd)
+/**
+ * Github Reposity link setup
+ *
+ * Returns 'ERROR' if not found
+ *
+ * @param T_Branch Branch Name
+ * @param linkEnd File name (Path to file). Add "/" To Start
+ *
+ * Link: GithubReposityLink + T_Branch + linkEnd
+ *
+ * Link Example: [https://raw.githubusercontent.com/ USERNAME / REPOSITYNAME /] + [main] + [/version.txt]
+**/
+GetNewVersionFromGithub(T_Branch,linkEnd)
 {
     ;Build link
     VersionLink := GithubReposityLink . T_Branch . linkEnd
@@ -317,7 +381,7 @@ GetNewVersion(T_Branch,linkEnd)
     if(T_NewVersion == "ERROR")
     {
         ;msgbox,,No Internet Connection!,No Internet Connection!
-        return
+        return "ERROR"
     }
     ;Check that not empty or not found
     if(T_NewVersion != "" and T_NewVersion != "404: Not Found" and T_NewVersion != "500: Internal Server Error" and T_NewVersion != "400: Invalid request")
@@ -328,6 +392,58 @@ GetNewVersion(T_Branch,linkEnd)
     {
         return "ERROR"
     }
+}
+/**
+ * Returns version found (Empty if not found)
+ *
+ * @param VersionVariableName Is case sensitive
+ * @param AhkFile Path to Ahk File
+**/
+ReadVersionFromAhkFile(VersionVariableName,AhkFile)
+{
+    ;Variables
+    VersionFile := FileRead(AhkFile)
+    FoundVersion := ""
+
+    loop parse, VersionFile, "`n" ;Loop lines
+    {
+        if(InStr(A_LoopField,VersionVariableName,1)) ;If contains variable name
+        {
+            FoundVersion := ParseVersionLine(A_LoopField)
+            break
+        }
+    }
+    return FoundVersion
+}
+/**
+ * Parses ahk variable
+**/
+ParseVersionLine(Line)
+{
+    ReturnFoundVersion := ""
+    VarStart := false
+    VarEnd := false
+    loop parse, Line ;Loop line characters
+    {
+        if(InStr(A_LoopField,'"')) ;Find "
+        {
+            if(VarStart) ;End "
+            {
+                VarEnd := true
+                break
+            }
+            else ;Start saving after "
+            {
+                VarStart := true
+                continue
+            }
+        }
+        else if(VarStart) ;Save characters to variable
+        {
+            ReturnFoundVersion := ReturnFoundVersion A_LoopField
+        }
+    }
+    return ReturnFoundVersion
 }
 ;____________________________________________________________
 ;____________________________________________________________
