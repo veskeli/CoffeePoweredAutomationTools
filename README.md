@@ -16,6 +16,7 @@
 
 [![https://www.autohotkey.com/](Images/Ahk.png)](https://www.autohotkey.com/)
 [![Download link here](Images/MyScript.png)](https://github.com/veskeli/CoffeePoweredAutomationTools/releases)
-
+- - -
+### [ToDo](Notes/Todo.md)
 - - -
 ##### Rewritten "Game Scripts By Veskeli"
