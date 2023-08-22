@@ -5,7 +5,7 @@
 ##### CoffeeTools
 - - -
 >[!IMPORTANT]
->Auto Hotkey 2.0 Or above required
+>Auto Hotkey 2.0 or above required
 ## Download:
 1. Download and install Auto Hotkey
 	- www.autohotkey.com
