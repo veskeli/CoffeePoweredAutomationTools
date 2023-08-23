@@ -12,7 +12,6 @@ Last updated on version: `0.244`
 		- [ ] Manage updates
 		- [ ] Manage auto install
 - [ ] Windows settings from old script
-- [ ] Other scripts 'Marketplace' style downloader
 - [ ] New Home screen
 	- [ ] Toggle always on top
 	- [ ] Quick actions
@@ -21,6 +20,16 @@ Last updated on version: `0.244`
 	- [ ] Uninstaller
 	- [ ] Changelog in app
 		- [x] Simple changelog
+- [ ] Plugin Manager `Currently supported plugin count ~20`
+	- Plugins are way to create more tabs and update them separately
+	- Way to test and create tabs before adding them to main script
+	-  `Currently supported plugin count ~20` Reason: No scrollbar in auto hotkey
+	- Usually plugins should go like: Alpha -> Beta -> Stable -> Main script
+	- [ ] Basic
+		- [ ] Different gui
+		- [ ] Download and manage
+	- [ ] Download and manage
+	- [ ] Reorder tabs
 ### After 1.0
 - [ ] Better offline handling
 - [ ] Close scripts when games detected
@@ -88,6 +97,8 @@ Last updated on version: `0.14`
 	- [ ] Toggle any application 'Always on top'
 		- [ ] Save Applications to profiles
 		- [ ] Profile manager
+- [ ] Other scripts
+	- [ ] 'Marketplace' style downloader
 ### After 1.0
 - [ ] All basic scripts from old script
 - - -
