@@ -28,7 +28,7 @@ Last updated on version: `0.244`
 ## Updater
 Last updated on version: `0.51`
 - [x] Basic updater
-- [x] New workflow `Added 0.5+`
+- [x] New workflow `Added in 0.5`
 	- [x] Check/Read version from script file
 	- [ ] Check if main script was open when started update
 	- [ ] Manage Branches
