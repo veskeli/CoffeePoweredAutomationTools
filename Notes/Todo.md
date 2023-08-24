@@ -55,6 +55,9 @@ Last updated on version: `0.51`
 		- [ ] Auto install
 - [ ] Update all tabs and scripts independently
 - [ ] Better self update
+- [ ] On main script restart open correct version `(Normal | Plugin Loader)
+	- [ ] On main script close save version `(Normal | Plugin Loader)
+	- [ ] On main script open load just closed version `(Normal | Plugin Loader)
 - Currently Auto updates itself automatically
 - Currently asks installer and main script updates
 - - -
