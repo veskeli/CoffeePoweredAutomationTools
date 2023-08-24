@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.51"
+UpdaterVersion := "0.52"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -140,6 +140,9 @@ ExitApp()
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Update Main File]///////////////
+/**
+ * Check if main script is open and close it
+**/
 CloseMainScript()
 {
     ;Check That if script is running
@@ -151,6 +154,19 @@ CloseMainScript()
         WinClose()
     }
 }
+/**
+ * If main script found open it
+**/
+OpenMainScript()
+{
+    if (FileExist(MainScriptAhkFile))
+    {
+        Run(MainScriptAhkFile)
+    }
+}
+/**
+ * Ask user if update
+**/
 AskToDownloadUpdates(T_ScriptName,T_CurrentVersion,T_NewVersion,T_Branch := "main")
 {
     ;[TODO] Check for settings (Auto install)
@@ -194,8 +210,12 @@ UpdateMainFiles(branch)
 {
     StartProgressBar()
     ;Download files
-    if(ScriptUpdate)
-        UpdateFileFromGithub(GithubReposityLink branch "/CoffeeTools.ahk",MainScriptAhkFile) ;Main script update
+    if(ScriptUpdate) ;Main script update
+    {
+        CloseMainScript()
+        UpdateFileFromGithub(GithubReposityLink branch "/CoffeeTools.ahk",MainScriptAhkFile)
+        OpenMainScript()
+    }
     if(LauncherUpdate)
         UpdateFileFromGithub(GithubReposityLink branch "/Launcher.ahk",LauncherAhkFile) ;Launcher update
     SetProgressBarState(-1)
