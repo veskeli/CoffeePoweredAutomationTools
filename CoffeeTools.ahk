@@ -23,14 +23,13 @@ Changelog := "
 + Tray menu is back
 + Asset download
 + Updater status/version
-+ Plugins
++ Basic Plugin Manager
 )"
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.244"
+Version := "0.3"
 ;//////////////[Folders]///////////////
-VersionTitle := "Plugin Support"
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
 AppFolder := A_AppData . "\" . AppFolderName
@@ -41,9 +40,11 @@ AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
 LauncherAhkFile := AppFolder . "\Launcher.ahk"
 MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
 ;//////////////[Variables]///////////////
+VersionTitle := "Plugin Support"
 CurrentScriptBranch := "main"
 CloseToTray := false
 PluginsLoaded := false
+PluginsInManagerCount := 1
 ;//////////////[Tabs]///////////////
 HomeTAB := true
 SettingsTAB := true
@@ -51,6 +52,9 @@ OtherScriptsTAB := false ;Set to true
 WindowsTAB := false ;Set to true
 ;//////////////[Links]///////////////
 GithubPage := "https://github.com/veskeli/CoffeePoweredAutomationTools"
+RawGithubPage := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools"
+PluginGithubLink := RawGithubPage "/" CurrentScriptBranch "/Plugins"
+AllPluginsFile := RawGithubPage "/" CurrentScriptBranch "/Plugins/AllPlugins.txt"
 ;//////////////[ini]///////////////
 AppSettingsIni := AppSettingsFolder . "\Settings.ini"
 AppGameScriptSettingsIni := AppSettingsFolder . "\GameScriptSettings.ini"
@@ -650,15 +654,87 @@ FileOrFolderMissing(IsFolder)
         MsgBox("File does not exist.","File Missing","T20")
     }
 }
+/**
+ * Create and open Plugin manager
+**/
 PluginManagerInt()
 {
     global PluginManagerGui := Gui()
     PluginManagerGui.Add("Text", "x8 y8 w73 h23 +0x200", "Plugin name:")
     PluginManagerGui.Add("Text", "x8 y40 w395 h2 +0x10")
     ;Plugins here
-    PluginManagerGui.Add("Text", "x8 y48 w207 h23 +0x200", "Plugin")
-    ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y48 w80 h23 +Disabled", "Settings")
-    ogcButtonInstall := PluginManagerGui.Add("Button", "x312 y48 w80 h23", "Install")
+    ;PluginManagerGui.Add("Text", "x8 y48 w207 h23 +0x200", "Plugin")
+    ;ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y48 w80 h23 +Disabled", "Settings")
+    ;ogcButtonInstall := PluginManagerGui.Add("Button", "x312 y48 w80 h23", "Install")
+    GetAllPlugins()
     PluginManagerGui.OnEvent('Close', (*) => PluginManagerGui.Destroy())
     PluginManagerGui.Title := "Plugin Manager"
+}
+/**
+ * Read file from github containg all plugin names
+ * Then adds them to plugin manager
+**/
+GetAllPlugins()
+{
+    ;Read file containing all plugin names
+    whr := ComObject("WinHttp.WinHttpRequest.5.1")
+    whr.Open("GET", AllPluginsFile, False)
+    whr.Send()
+    whr.WaitForResponse()
+    Response := whr.ResponseText
+
+    ;add all plugins to gui
+    loop parse, Response, "`n"
+    {
+        AddNewPlugin(A_LoopField)
+    }
+}
+/**
+ * Create plugin line
+ * * Used in GetAllPlugins()
+**/
+AddNewPlugin(PluginName)
+{
+    global PluginsInManagerCount
+    StartingY := 20
+    CorrectY := StartingY + 28 * PluginsInManagerCount
+
+    PluginManagerGui.Add("Text", "x8 y" CorrectY " w207 h23 +0x200", PluginName)
+    ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y" CorrectY " w80 h23 +Disabled", "Settings")
+    ogcButtonInstall := PluginManagerGui.Add("Button", "x312 y" CorrectY " w80 h23", "Install")
+    ogcButtonInstall.OnEvent("Click", DownloadPlugin.Bind(PluginName))
+
+    destination := AppPluginsFolder "/" PluginName ".ahk"
+    if(FileExist(destination))
+        ogcButtonInstall.Text := "Remove"
+
+    PluginsInManagerCount++
+}
+/**
+ * @param PluginName Downloads this plugin if found
+**/
+DownloadPlugin(PluginName,obj,*)
+{
+    url := PluginGithubLink "/" PluginName ".ahk"
+    destination := AppPluginsFolder "/" PluginName ".ahk"
+    if(FileExist(destination))
+    {
+        obj.Enabled := false
+        obj.Text := "Deleting..."
+
+        FileDelete(destination)
+
+        obj.Enabled := true
+        obj.Text := "Install"
+    }
+    else
+    {
+        obj.Enabled := false
+        obj.Text := "Downloading..."
+
+        Download(url,destination)
+
+        obj.Enabled := true
+        obj.Text := "Remove"
+    }
 }
