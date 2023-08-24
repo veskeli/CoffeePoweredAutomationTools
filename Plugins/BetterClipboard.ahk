@@ -8,6 +8,10 @@ $^c::
 {
     BetterClipboardFolder := AppPluginsFolder "/BetterClipboard"
     ClipboardHistoryFile := BetterClipboardFolder "/ClipboardHistory.txt"
+
+    DirCreate(BetterClipboardFolder)
+
     Send("^c")
+
     FileAppend(A_Clipboard "`n",ClipboardHistoryFile)
 }
