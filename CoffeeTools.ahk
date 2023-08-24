@@ -29,7 +29,7 @@ Changelog := "
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.32"
+Version := "0.321"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -707,7 +707,7 @@ AddNewPlugin(PluginName)
     ogcButtonInstall := PluginManagerGui.Add("Button", "x312 y" CorrectY " w80 h23", "Install")
     ogcButtonInstall.OnEvent("Click", DownloadPlugin.Bind(PluginName))
 
-    destination := AppPluginsFolder "/" FixedPluginName ".ahk"
+    destination := AppPluginsFolder "/" FixedPluginName[1] ".ahk"
     if(FileExist(destination))
         ogcButtonInstall.Text := "Remove"
 
