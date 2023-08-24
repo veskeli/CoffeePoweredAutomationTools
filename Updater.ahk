@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.532"
+UpdaterVersion := "0.533"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -20,6 +20,7 @@ global AppSettingsFolder := AppFolder . "\Settings"
 global AppPluginsFolder := AppFolder . "\Plugins"
 global MainScriptFile := AppFolder . "\" . ScriptName
 global MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
+global MainScriptAhkFileWithPlugins := AppFolder . "\" . ScriptName . "WithPlugins.ahk"
 global LauncherAhkFile := AppFolder . "\Launcher.ahk"
 ;//////////////[ini]///////////////
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
@@ -47,6 +48,7 @@ global GithubReposityLink
 global MainScriptBranch
 global UserCanceledUpdate := false
 global SkipRunningLatestMessage := false
+global MainScriptStartInSafeMode := true
 
 
 
@@ -159,11 +161,13 @@ CloseMainScript()
     {
         ;Stop Script
         WinClose()
+        MainScriptStartInSafeMode := true
     }
     If WinExist("CoffeeToolsWithPlugins.ahk" . " ahk_class AutoHotkey") ;With plugins
     {
         ;Stop Script
         WinClose()
+        MainScriptStartInSafeMode := false
     }
 }
 /**
@@ -171,9 +175,26 @@ CloseMainScript()
 **/
 OpenMainScript()
 {
-    if (FileExist(MainScriptAhkFile))
+    if(MainScriptStartInSafeMode)
     {
-        Run(MainScriptAhkFile)
+        if (FileExist(MainScriptAhkFile))
+        {
+            Run(MainScriptAhkFile)
+        }
+    }
+    else
+    {
+        if (FileExist(MainScriptAhkFileWithPlugins))
+        {
+            Run(MainScriptAhkFileWithPlugins)
+        }
+        else
+        {
+            if (FileExist(MainScriptAhkFile))
+            {
+                Run(MainScriptAhkFile)
+            }
+        }
     }
 }
 /**
