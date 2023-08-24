@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.531"
+UpdaterVersion := "0.532"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -155,7 +155,12 @@ CloseMainScript()
     ;Check That if script is running
     SetTitleMatchMode(2)
     DetectHiddenWindows(true)
-    If WinExist("CoffeeTools.ahk" . " ahk_class AutoHotkey")
+    If WinExist("CoffeeTools.ahk" . " ahk_class AutoHotkey") ;Main Script
+    {
+        ;Stop Script
+        WinClose()
+    }
+    If WinExist("CoffeeToolsWithPlugins.ahk" . " ahk_class AutoHotkey") ;With plugins
     {
         ;Stop Script
         WinClose()
