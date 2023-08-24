@@ -28,7 +28,7 @@ Changelog := "
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.3"
+Version := "0.31"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -698,6 +698,7 @@ AddNewPlugin(PluginName)
     global PluginsInManagerCount
     StartingY := 20
     CorrectY := StartingY + 28 * PluginsInManagerCount
+    FixedPluginName := StrSplit(PluginName,A_Space)
 
     PluginManagerGui.Add("Text", "x8 y" CorrectY " w207 h23 +0x200", PluginName)
     ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y" CorrectY " w80 h23 +Disabled", "Settings")
@@ -715,8 +716,11 @@ AddNewPlugin(PluginName)
 **/
 DownloadPlugin(PluginName,obj,*)
 {
+    FixedPluginName := StrSplit(PluginName,A_Space)
+    PluginName := FixedPluginName[1]
     url := PluginGithubLink "/" PluginName ".ahk"
     destination := AppPluginsFolder "/" PluginName ".ahk"
+
     if(FileExist(destination))
     {
         obj.Enabled := false
