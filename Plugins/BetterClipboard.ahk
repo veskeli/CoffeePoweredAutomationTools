@@ -3,13 +3,11 @@
 BetterClipboardLoadTab()
 {
     Tab.UseTab("BetterClipboard")
-    ;________________________________________________________________________________________________________________________
-    ;//////////////[Variables]///////////////
-    BetterClipboardFolder := AppPluginsFolder "/BetterClipboard"
-    ClipboardHistoryFile := BetterClipboardFolder "/ClipboardHistory.txt"
 }
 $^c::
 {
+    BetterClipboardFolder := AppPluginsFolder "/BetterClipboard"
+    ClipboardHistoryFile := BetterClipboardFolder "/ClipboardHistory.txt"
     Send("^c")
     FileAppend(A_Clipboard "`n",ClipboardHistoryFile)
 }
