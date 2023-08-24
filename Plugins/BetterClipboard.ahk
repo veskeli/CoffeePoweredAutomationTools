@@ -1,9 +1,9 @@
 #Requires AutoHotkey v2.0+
-BetterClipboardVersion := "0.11"
+BetterClipboardVersion := "0.12"
 BetterClipboardLoadTab()
 {
     Tab.UseTab("BetterClipboard")
-    ogcButtonOpenScriptFolder := myGui.Add("Button", "x16 y312 w110 h23", "Button Test")
+    global ogcListBox := myGui.Add("ListBox", "x40 y40 w514 h264","")
 }
 $^c::
 {
@@ -16,5 +16,6 @@ $^c::
     Send("^c")
     ClipWait(1)
 
-    FileAppend(A_Clipboard "`n",ClipboardHistoryFile)
+    ;FileAppend(A_Clipboard "`n",ClipboardHistoryFile)
+    ogcListBox.Add := A_Clipboard
 }
