@@ -9,3 +9,4 @@ RandomMessage(*)
 {
     MsgBox("Test")
 }
+;gui size w835 h494
