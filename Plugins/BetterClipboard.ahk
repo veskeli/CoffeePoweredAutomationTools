@@ -3,7 +3,7 @@ BetterClipboardVersion := "0.12"
 BetterClipboardLoadTab()
 {
     Tab.UseTab("BetterClipboard")
-    global ogcListBox := myGui.Add("ListBox", "x40 y40 w514 h264","")
+    global ogcListBox := myGui.Add("ListBox", "x40 y40 w514 h264",["ListBox"])
 }
 $^c::
 {
