@@ -1,8 +1,9 @@
 #Requires AutoHotkey v2.0+
-BetterClipboardVersion := "0.1"
+BetterClipboardVersion := "0.11"
 BetterClipboardLoadTab()
 {
     Tab.UseTab("BetterClipboard")
+    ogcButtonOpenScriptFolder := myGui.Add("Button", "x16 y312 w110 h23", "Button Test")
 }
 $^c::
 {
