@@ -57,7 +57,8 @@ Last updated on version: `0.51`
 - [ ] Better self update
 - [x] On main script restart open correct version `(Normal | Plugin Loader)`
 	- [x] On main script close save version `(Normal | Plugin Loader)`
-	- [x] On main script open load just closed version `(Normal | Plugin Loader)`
+	- [ ] On main script open load just closed version `(Normal | Plugin Loader)`
+- [ ] Close when main script closes
 - Currently Auto updates itself automatically
 - Currently asks installer and main script updates
 - - -
