@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.53"
+UpdaterVersion := "0.531"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -521,7 +521,9 @@ DownloadPlugin(PluginName,*)
     ;[TODO] download file to new folder and let main script move it
     destination := AppPluginsFolder "/" PluginName ".ahk"
 
+    CloseMainScript()
     Download(url,destination)
+    OpenMainScript()
 }
 ;____________________________________________________________
 ;____________________________________________________________
