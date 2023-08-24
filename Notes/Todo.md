@@ -25,7 +25,7 @@ Last updated on version: `0.244`
 	- Way to test and create tabs before adding them to main script
 	-  `Currently supported plugin count ~20` Reason: No scrollbar in auto hotkey
 	- Usually plugins should go like: Alpha -> Beta -> Stable -> Main script
-	- [x] Basic `Currently supported plugin count ~20`
+	- [x] Basic `Currently supported plugin count ~20` `Added in 0.3`
 		- [x] Different gui
 		- [x] Download and remove
 		- [ ] Settings
