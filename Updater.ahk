@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.52"
+UpdaterVersion := "0.53"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -17,6 +17,7 @@ global ScriptName := "CoffeeTools"
 global AppFolderName := "CoffeePoweredAutomationTools"
 global AppFolder := A_AppData . "\" . AppFolderName
 global AppSettingsFolder := AppFolder . "\Settings"
+global AppPluginsFolder := AppFolder . "\Plugins"
 global MainScriptFile := AppFolder . "\" . ScriptName
 global MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
 global LauncherAhkFile := AppFolder . "\Launcher.ahk"
@@ -30,7 +31,8 @@ AppUpdateFile := AppFolder . "\temp\Updater.ahk"
 AppTempFolder := AppFolder . "\temp"
 ShowRunningLatestMessage := True
 ;//////////////[Links]///////////////
-GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/"
+global GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/"
+global RawGithubPage := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools"
 ;//////////////[Script Dir]///////////////
 ScriptFullPath := ""
 T_SkipShortcut := "false"
@@ -116,7 +118,12 @@ if(LauncherVersion != "")
     }
 }
 
-
+;//////////////[Check for plugin updates]///////////////
+;[TODO] Check for auto update
+loop files, AppPluginsFolder "\*"
+{
+    CheckForPluginUpdate(A_LoopFileName)
+}
 
 ;//////////////[Ask for main script updates]///////////////
 if(ScriptUpdate)
@@ -468,6 +475,53 @@ ParseVersionLine(Line)
         }
     }
     return ReturnFoundVersion
+}
+CheckForPluginUpdate(FileName)
+{
+    GetPluginName := StrSplit(FileName,".ahk")
+    PluginName := GetPluginName[1]
+
+    OldPluginVersion := ReadVersionFromAhkFile(PluginName "Version",AppPluginsFolder "\" FileName)
+    NewPluginVersion := GetNewVersionFromGithub(MainScriptBranch,"/Version/" PluginName ".txt")
+
+    if(OldPluginVersion != "")
+    {
+        if(NewPluginVersion != "ERROR")
+        {
+            if(NewPluginVersion > OldPluginVersion)
+            {
+                ;Ask to update plugin
+                UpdateText := PluginName ":`nCurrent: " OldPluginVersion " New: " NewPluginVersion
+
+                global PluginGui := Gui()
+                PluginGui.Opt("-MinimizeBox -MaximizeBox")
+                PluginGui.SetFont("s9")
+                PluginGui.Add("Text", "x-1 y75 w400 h50 -Background +0x1000")
+                PluginGui.Add("Text", "x8 y18 w202 h50", UpdateText)
+                ogcButtonDownload := PluginGui.Add("Button", "x40 y80 w80 h23", "&Download")
+                ogcButtonDownload.OnEvent("Click", (*) => DownloadPlugin(PluginName))
+                ogcButtonOK := PluginGui.Add("Button", "x128 y80 w80 h23", "&OK")
+                ogcButtonOK.OnEvent("Click", (*) => PluginGui.Destroy())
+                PluginGui.OnEvent('Close', (*) => PluginGui.Destroy())
+                PluginGui.Title := "Plugin Update!"
+                PluginGui.Show("w210 h110")
+
+                ;Wait for gui close
+                WinWaitClose(PluginGui)
+            }
+        }
+    }
+}
+DownloadPlugin(PluginName,*)
+{
+    PluginGui.Destroy()
+
+    PluginGithubLink := RawGithubPage "/" MainScriptBranch "/Plugins"
+    url := PluginGithubLink "/" PluginName ".ahk"
+    ;[TODO] download file to new folder and let main script move it
+    destination := AppPluginsFolder "/" PluginName ".ahk"
+
+    Download(url,destination)
 }
 ;____________________________________________________________
 ;____________________________________________________________

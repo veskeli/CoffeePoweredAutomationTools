@@ -49,7 +49,7 @@ Last updated on version: `0.51`
 	- [ ] Better message box
 	- [x] Ask to download update
 - [ ] Plugin updater
-	- [ ] Basic Download and update
+	- [x] Basic Download and update
 	- [ ] Ask to install
 	- [ ] Read settings
 		- [ ] Auto install
