@@ -23,12 +23,13 @@ Changelog := "
 + Tray menu is back
 + Asset download
 + Updater status/version
+0.3+ Changelog:
 + Basic Plugin Manager
 )"
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.31"
+Version := "0.32"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -676,6 +677,7 @@ PluginManagerInt()
 **/
 GetAllPlugins()
 {
+    global PluginsInManagerCount := 1 ;Reset Count
     ;Read file containing all plugin names
     whr := ComObject("WinHttp.WinHttpRequest.5.1")
     whr.Open("GET", AllPluginsFile, False)
@@ -705,7 +707,7 @@ AddNewPlugin(PluginName)
     ogcButtonInstall := PluginManagerGui.Add("Button", "x312 y" CorrectY " w80 h23", "Install")
     ogcButtonInstall.OnEvent("Click", DownloadPlugin.Bind(PluginName))
 
-    destination := AppPluginsFolder "/" PluginName ".ahk"
+    destination := AppPluginsFolder "/" FixedPluginName ".ahk"
     if(FileExist(destination))
         ogcButtonInstall.Text := "Remove"
 

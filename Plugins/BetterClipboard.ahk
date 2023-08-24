@@ -3,9 +3,7 @@ BetterClipboardLoadTab()
 {
     Tab.UseTab("BetterClipboard")
 }
-
 $^c::
 {
-    ;Send("^c")
-    MsgBox("Test")
+    Send("^c")
 }
