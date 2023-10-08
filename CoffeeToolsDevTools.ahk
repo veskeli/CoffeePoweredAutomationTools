@@ -1,4 +1,5 @@
 #Requires Autohotkey v2
+;Build 1
 
 myGui := Gui()
 myGui.Opt("-MaximizeBox")
