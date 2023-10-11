@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.534"
+UpdaterVersion := "0.535"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -214,15 +214,15 @@ AskToDownloadUpdates(T_ScriptName,T_CurrentVersion,T_NewVersion,T_Branch := "mai
     UpdateText := "Update for " T_ScriptName "!`n`n"
     if(T_Branch == "main")
     {
-        UpdateText := UpdateText "New version is: " . T_CurrentVersion . "`nOld is: " . T_NewVersion .  "`nUpdate now?"
+        UpdateText := UpdateText "New version is: " . T_NewVersion . "`nOld is: " . T_CurrentVersion .  "`nUpdate now?"
     }
     else if(T_Branch == "PreRelease")
     {
-        UpdateText := UpdateText "New Pre-Release is: " . T_CurrentVersion . "`nOld is: " . T_NewVersion .  "`nUpdate now?"
+        UpdateText := UpdateText "New Pre-Release is: " . T_NewVersion . "`nOld is: " . T_CurrentVersion .  "`nUpdate now?"
     }
     else if(T_Branch == "Experimental")
     {
-        UpdateText := UpdateText "New Experimental version is: " . T_CurrentVersion . "`nOld is: " . T_NewVersion .  "`nUpdate now?"
+        UpdateText := UpdateText "New Experimental version is: " . T_NewVersion . "`nOld is: " . T_CurrentVersion .  "`nUpdate now?"
     }
     msgResult := MsgBox(UpdateText, "Update for " T_ScriptName "!", 4)
     if (msgResult = "Yes")
