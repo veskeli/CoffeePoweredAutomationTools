@@ -120,10 +120,11 @@ $#C::
 /**
  * Saves and adds text to gui and file
 **/
-BCAddToHistory(Text)
+BCAddToHistory(Text, tProfile := "ClipboardHistory")
 {
     ;Vars
-    ClipboardHistoryFile := AppPluginsFolder "/BetterClipboard" "/ClipboardHistory.ini"
+    CustomProfile := tProfile ".ini"
+    ClipboardHistoryFile := AppPluginsFolder "/BetterClipboard" "/" CustomProfile
     local IsMultiline := false
 
     ;load count
