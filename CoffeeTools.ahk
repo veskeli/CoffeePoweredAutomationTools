@@ -9,9 +9,9 @@ SetWorkingDir(A_ScriptDir)
 SplitPath(A_ScriptName, , , , &GameScripts)
 #MaxThreadsPerHotkey 4 ; no re-entrant hotkey handling
 ; DetectHiddenWindows, On
-SetWinDelay(-1) ; Remove short delay done automatically after every windowing command except IfWinActive and IfWinExist
-SetKeyDelay(-1, -1) ; Remove short delay done automatically after every keystroke sent by Send or ControlSend
-SetMouseDelay(-1) ; Remove short delay done automatically after Click and MouseMove/Click/Drag
+;SetWinDelay(-1) ; Remove short delay done automatically after every windowing command except IfWinActive and IfWinExist
+;SetKeyDelay(-1, -1) ; Remove short delay done automatically after every keystroke sent by Send or ControlSend
+;SetMouseDelay(-1) ; Remove short delay done automatically after Click and MouseMove/Click/Drag
 Persistent
 ;________________________________________________________________________________________________________________________
 ;//////////////[Changelog]///////////////
@@ -29,7 +29,7 @@ Changelog := "
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.321"
+Version := "0.322"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
@@ -44,7 +44,7 @@ MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
 VersionTitle := "Plugin Support"
 CurrentScriptBranch := "main"
 CloseToTray := false
-PluginsLoaded := false
+global PluginsLoaded := false
 PluginsInManagerCount := 1
 ;//////////////[Tabs]///////////////
 HomeTAB := true
@@ -612,7 +612,8 @@ CheckForUpdates(SkipRunningLatestMessage)
     else
     {
         IniWrite(SkipRunningLatestMessage, AppUpdaterSettingsFile, "Options", "SkipRunningLatestMessage")
-
+        if(PluginsLoaded)
+            IniWrite(true, AppUpdaterSettingsFile, "Options", "PluginsLoaded")
         Run(AppUpdaterFile)
     }
 }
