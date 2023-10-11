@@ -104,6 +104,9 @@ Last updated on version: `0.14`
 		- [ ] Profile manager
 - [ ] Other scripts
 	- [ ] 'Marketplace' style downloader
+- [ ] Useful tools
+	- [ ] Manage apps like ISLC
+
 ### After 1.0
 - [ ] All basic scripts from old script
 - - -

@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.533"
+UpdaterVersion := "0.534"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -49,6 +49,7 @@ global MainScriptBranch
 global UserCanceledUpdate := false
 global SkipRunningLatestMessage := false
 global MainScriptStartInSafeMode := true
+global PluginsLoaded := false
 
 
 
@@ -76,6 +77,9 @@ oGui2.OnEvent("Escape", GuiEscape)
 ;//////////////[Check for redownload assets]///////////////
 if FileExist(AppUpdaterSettingsFile) ;Read Settings
 {
+    ;Plugins loaded
+    PluginsLoaded := IniRead(AppUpdaterSettingsFile, "Options", "PluginsLoaded",false)
+
     ;Redownload Assets
     BRedownloadAssets := IniRead(AppUpdaterSettingsFile, "Options", "RedownloadAssets", False)
     ;Show Running Latest Message
@@ -122,9 +126,12 @@ if(LauncherVersion != "")
 
 ;//////////////[Check for plugin updates]///////////////
 ;[TODO] Check for auto update
-loop files, AppPluginsFolder "\*"
+if(PluginsLoaded)
 {
-    CheckForPluginUpdate(A_LoopFileName)
+    loop files, AppPluginsFolder "\*"
+    {
+        CheckForPluginUpdate(A_LoopFileName)
+    }
 }
 
 ;//////////////[Ask for main script updates]///////////////
@@ -184,6 +191,7 @@ OpenMainScript()
     }
     else
     {
+        ;[TODO]Open launcher
         if (FileExist(MainScriptAhkFileWithPlugins))
         {
             Run(MainScriptAhkFileWithPlugins)
@@ -526,7 +534,7 @@ CheckForPluginUpdate(FileName)
                 PluginGui.Add("Text", "x8 y18 w202 h50", UpdateText)
                 ogcButtonDownload := PluginGui.Add("Button", "x40 y80 w80 h23", "&Download")
                 ogcButtonDownload.OnEvent("Click", (*) => DownloadPlugin(PluginName))
-                ogcButtonOK := PluginGui.Add("Button", "x128 y80 w80 h23", "&OK")
+                ogcButtonOK := PluginGui.Add("Button", "x128 y80 w80 h23", "&Skip for now")
                 ogcButtonOK.OnEvent("Click", (*) => PluginGui.Destroy())
                 PluginGui.OnEvent('Close', (*) => PluginGui.Destroy())
                 PluginGui.Title := "Plugin Update!"
