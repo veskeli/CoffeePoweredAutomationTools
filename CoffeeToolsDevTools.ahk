@@ -1,5 +1,6 @@
 #Requires Autohotkey v2
-BuildVersion := "Build 2"
+#SingleInstance Force
+BuildVersion := "Build 3"
 
 myGui := Gui()
 myGui.Opt("-MaximizeBox")
@@ -9,7 +10,7 @@ Tab.UseTab(1)
 
 ;Version control
 myGui.Add("GroupBox", "x8 y32 w210 h139", "Update Version")
-VersionDropDownList := myGui.Add("DropDownList", "x16 y48 w197", ["CoffeeTools", "Updater"]) ;["CoffeeTools", "Updater", "Launcher", "Installer"]
+VersionDropDownList := myGui.Add("DropDownList", "x16 y48 w197", ["CoffeeTools", "Updater", "Launcher", "Installer"])
 VersionDropDownList.Choose(1)
 CurrentVersionText := myGui.Add("Text", "x16 y85 w187 h23 +0x200", "Current Version: 0.000")
 CoffeeToolsCurrentVersion := ReadVersionFromAhkFile("Version","CoffeeTools")
@@ -89,7 +90,8 @@ UpdateAhkVersion(*)
     ;Variables
     local SelectedScript := VersionDropDownList.Text
     local SelectedScriptTextFile := VersionDropDownList.Text
-    local SelectedVersionText := 'Version := "'
+    local ApplicationVersion := GetApplicationVersionName(VersionDropDownList.Value)
+    local SelectedVersionText := ApplicationVersion ' := "'
 
     if(VersionDropDownList.Value == 1)
         SelectedScriptTextFile := "CoffeePoweredAutomationTools"
@@ -99,14 +101,6 @@ UpdateAhkVersion(*)
     local MainScriptAhkFile := A_ScriptDir . "\" . SelectedScript . ".ahk"
     local MainScriptAhkFileTemp := A_ScriptDir . "\" . "Temp" . SelectedScript . ".ahk"
 
-    switch VersionDropDownList.Value {
-        case 1:
-            SelectedVersionText := 'Version := "'
-        case 2:
-            SelectedVersionText := 'UpdaterVersion := "'
-        default:
-            SelectedVersionText := 'Version := "'
-    }
 
     ;Version text file
     if(FileExist(PathToVersionFile) and FileExist(MainScriptAhkFile))
@@ -174,20 +168,40 @@ UpdateAhkVersion(*)
     }
 }
 
-
+GetApplicationName(tValue)
+{
+    switch  tValue{
+        case 1:
+            return "CoffeeTools"
+        case 2:
+            return "Updater"
+        case 3:
+            return "Launcher"
+        case 4:
+            return "Installer"
+        default:
+            return "CoffeeTools"
+    }
+}
+GetApplicationVersionName(tValue)
+{
+    switch  tValue{
+        case 1:
+            return "Version"
+        case 2:
+            return "UpdaterVersion"
+        case 3:
+            return "LauncherVersion"
+        case 4:
+            return "InstallerVersion"
+        default:
+            return "Version"
+    }
+}
 UpdateApplicationVersion(*)
 {
-    switch  VersionDropDownList.Value{
-        case 1:
-            ApplicationName := "CoffeeTools"
-            ApplicationVersion := "Version"
-        case 2:
-            ApplicationName := "Updater"
-            ApplicationVersion := "UpdaterVersion"
-        default:
-            ApplicationName := "CoffeeTools"
-            ApplicationVersion := "Version"
-    }
+    ApplicationName := GetApplicationName(VersionDropDownList.Value)
+    ApplicationVersion := GetApplicationVersionName(VersionDropDownList.Value)
 
     local CurrentVersion := ReadVersionFromAhkFile(ApplicationVersion,ApplicationName)
     CurrentVersionText.Text := "Current Version: " CurrentVersion
