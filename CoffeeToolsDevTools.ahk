@@ -1,5 +1,5 @@
 #Requires Autohotkey v2
-;Build 1
+;Build 2
 
 myGui := Gui()
 myGui.Opt("-MaximizeBox")
@@ -9,14 +9,15 @@ Tab.UseTab(1)
 
 ;Version control
 myGui.Add("GroupBox", "x8 y32 w210 h139", "Update Version")
-VersionDropDownList := myGui.Add("DropDownList", "x16 y48 w197 +Disabled", ["CoffeeTools", "Updater", "Launcher", "Installer"])
+VersionDropDownList := myGui.Add("DropDownList", "x16 y48 w197", ["CoffeeTools", "Updater"]) ;["CoffeeTools", "Updater", "Launcher", "Installer"]
 VersionDropDownList.Choose(1)
-CurrentVersionText := myGui.Add("Text", "x16 y80 w187 h23 +0x200", "Current Version: 0.000")
+CurrentVersionText := myGui.Add("Text", "x16 y85 w187 h23 +0x200", "Current Version: 0.000")
 CoffeeToolsCurrentVersion := ReadVersionFromAhkFile("Version","CoffeeTools")
-CurrentVersionText.Text := "Current Version: " CoffeeToolsCurrentVersion
 myGui.Add("Text", "x16 y104 w70 h23 +0x200", "New version:")
 Edit1 := myGui.Add("Edit", "x88 y105 w120 h21", "0.000")
 Edit1.Text := CoffeeToolsCurrentVersion
+UpdateApplicationVersion(VersionDropDownList.Value)
+VersionDropDownList.OnEvent("Change", UpdateApplicationVersion.Bind())
 ogcButtonUpdate := myGui.Add("Button", "x10 y136 w50 h23", "Update")
 ogcButtonUpdate.OnEvent("Click", UpdateAhkVersion.Bind())
 ogcButtonUpdateUp1 := myGui.Add("Button", "x60 y136 w50 h23", "Up 0.1")
@@ -86,59 +87,112 @@ AddToUpdateNumber(AddAmount,*)
 UpdateAhkVersion(*)
 {
     ;Variables
+    local SelectedScript := VersionDropDownList.Text
+    local SelectedScriptTextFile := VersionDropDownList.Text
+    local SelectedVersionText := 'Version := "'
+
+    if(VersionDropDownList.Value == 1)
+        SelectedScriptTextFile := "CoffeePoweredAutomationTools"
+
     local PathToAhkFile := A_ScriptDir "\" VersionDropDownList.Text ".ahk"
-    local PathToVersionFile := A_ScriptDir "\" "Version" "\" "CoffeePoweredAutomationTools" "Version" ".txt"
-    local MainScriptAhkFile := A_ScriptDir . "\" . "CoffeeTools" . ".ahk"
-    local MainScriptAhkFileTemp := A_ScriptDir . "\" . "TempCoffeeTools" . ".ahk"
+    local PathToVersionFile := A_ScriptDir "\" "Version" "\" SelectedScriptTextFile "Version" ".txt"
+    local MainScriptAhkFile := A_ScriptDir . "\" . SelectedScript . ".ahk"
+    local MainScriptAhkFileTemp := A_ScriptDir . "\" . "Temp" . SelectedScript . ".ahk"
+
+    switch VersionDropDownList.Value {
+        case 1:
+            SelectedVersionText := 'Version := "'
+        case 2:
+            SelectedVersionText := 'UpdaterVersion := "'
+        default:
+            SelectedVersionText := 'Version := "'
+    }
 
     ;Version text file
-    FileDelete(PathToVersionFile)
-    FileAppend(Edit1.Text,PathToVersionFile)
+    if(FileExist(PathToVersionFile) and FileExist(MainScriptAhkFile))
+    {
+        FileDelete(PathToVersionFile)
+        FileAppend(Edit1.Text,PathToVersionFile)
+    }
+    else
+    {
+        MsgBox("Text file or file missing")
+        return
+    }
 
     ;Ahk File
-    MainFile := FileRead(MainScriptAhkFile)
-    MainFileStart := ""
-    MainFileEnd := ""
-    SaveToStart := true
-    local VersionText := 'Version := "'
-    local NewVersionText := 'Version := "' Edit1.Text '"'
-
-    ;Copy and save new version
-    loop parse, MainFile, "`n"
+    if(FileExist(MainScriptAhkFile))
     {
-        if(InStr(A_LoopField,VersionText))
+        MainFile := FileRead(MainScriptAhkFile)
+        MainFileStart := ""
+        MainFileEnd := ""
+        SaveToStart := true
+        local VersionText := SelectedVersionText
+        local NewVersionText := SelectedVersionText Edit1.Text '"'
+
+        ;Copy and save new version
+        loop parse, MainFile, "`n"
         {
-            MainFileEnd := NewVersionText
-            SaveToStart := false
-            continue
-        }
-        else
-        {
-            if(A_Index == 1)
+            if(InStr(A_LoopField,VersionText))
             {
-                MainFileStart := A_LoopField
+                MainFileEnd := NewVersionText
+                SaveToStart := false
+                continue
             }
             else
             {
-                if(SaveToStart)
+                if(A_Index == 1)
                 {
-                    MainFileStart := MainFileStart . "`n" . A_LoopField
+                    MainFileStart := A_LoopField
                 }
                 else
                 {
-                    MainFileEnd := MainFileEnd . "`n" . A_LoopField
+                    if(SaveToStart)
+                    {
+                        MainFileStart := MainFileStart . "`n" . A_LoopField
+                    }
+                    else
+                    {
+                        MainFileEnd := MainFileEnd . "`n" . A_LoopField
+                    }
                 }
             }
         }
-    }
-    NewFile := MainFileStart . "`n" . MainFileEnd
+        if(SaveToStart)
+        {
+            MsgBox("Version not found")
+            return
+        }
+        NewFile := MainFileStart . "`n" . MainFileEnd
 
-    ;Write new file
-    FileMove(MainScriptAhkFile,MainScriptAhkFileTemp,true)
-    FileAppend(NewFile,MainScriptAhkFile)
+        ;Write new file
+        FileMove(MainScriptAhkFile,MainScriptAhkFileTemp,true)
+        FileAppend(NewFile,MainScriptAhkFile)
+
+        ;Update Gui
+        UpdateApplicationVersion()
+    }
 }
 
 
+UpdateApplicationVersion(*)
+{
+    switch  VersionDropDownList.Value{
+        case 1:
+            ApplicationName := "CoffeeTools"
+            ApplicationVersion := "Version"
+        case 2:
+            ApplicationName := "Updater"
+            ApplicationVersion := "UpdaterVersion"
+        default:
+            ApplicationName := "CoffeeTools"
+            ApplicationVersion := "Version"
+    }
+
+    local CurrentVersion := ReadVersionFromAhkFile(ApplicationVersion,ApplicationName)
+    CurrentVersionText.Text := "Current Version: " CurrentVersion
+    Edit1.Text := CurrentVersion
+}
 /**
  * Returns version found (Empty if not found)
  *
