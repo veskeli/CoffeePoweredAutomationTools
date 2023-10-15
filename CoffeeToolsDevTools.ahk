@@ -1,5 +1,5 @@
 #Requires Autohotkey v2
-;Build 2
+BuildVersion := "Build 2"
 
 myGui := Gui()
 myGui.Opt("-MaximizeBox")
@@ -56,7 +56,7 @@ ogcButtonSwitch := myGui.Add("Button", "x320 y120 w80 h22 +Disabled", "Switch")
 Tab.UseTab()
 
 myGui.OnEvent('Close', (*) => ExitApp())
-myGui.Title := "Coffee Tools Dev Tools | Build 1"
+myGui.Title := "Coffee Tools Dev Tools | " BuildVersion
 myGui.Show("w563 h345")
 
 ;Open scripts
