@@ -1,6 +1,6 @@
 #Requires Autohotkey v2
 #SingleInstance Force
-BuildVersion := "Build 3"
+BuildVersion := "Build 4"
 
 myGui := Gui()
 myGui.Opt("-MaximizeBox")
@@ -53,6 +53,9 @@ MoveToDropDownList := myGui.Add("DropDownList", "x272 y96 w120", ["Appdata", "De
 MoveToDropDownList.Choose(1)
 ogcButtonMove := myGui.Add("Button", "x232 y120 w80 h23 +Disabled", "Move")
 ogcButtonSwitch := myGui.Add("Button", "x320 y120 w80 h22 +Disabled", "Switch")
+;Script Settings
+ogcCheckBoxKeepthisalwaysontop := myGui.Add("CheckBox", "x150 y200 w143 h23", "Keep this always on top")
+ogcCheckBoxKeepthisalwaysontop.OnEvent("Click", KeepThisAlwaysOnTop.Bind("Normal"))
 
 Tab.UseTab()
 
@@ -61,13 +64,12 @@ myGui.Title := "Coffee Tools Dev Tools | " BuildVersion
 myGui.Show("w563 h345")
 
 ;Open scripts
-global StartPath := A_ScriptDir
 OpenScript(FileName,*)
 {
     ;Path
-    global StartPath
+    local StartPath := A_ScriptDir
     if(OpenFromDropDownList.Value == 2)
-        StartPath := A_AppData "\CoffeePoweredAutomationTools"
+            StartPath := A_AppData "\CoffeePoweredAutomationTools"
 
     Path := StartPath "\" FileName ".ahk"
 
@@ -259,4 +261,8 @@ ParseVersionLine(Line)
         }
     }
     return ReturnFoundVersion
+}
+KeepThisAlwaysOnTop(A_GuiEvent, GuiCtrlObj, Info, *)
+{
+    WinSetAlwaysOnTop(-1, "A")
 }
