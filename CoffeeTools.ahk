@@ -29,11 +29,13 @@ Changelog := "
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.322"
+Version := "0.323"
+VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
 AppFolderName := "CoffeePoweredAutomationTools"
-AppFolder := A_AppData . "\" . AppFolderName
+;AppFolder := A_AppData . "\" . AppFolderName
+AppFolder := A_ScriptDir
 AppPluginsFolder := AppFolder . "\Plugins"
 AppSettingsFolder := AppFolder . "\Settings"
 AppUpdaterFile := AppFolder . "\Updater.ahk"
@@ -68,6 +70,7 @@ RandomCoffeeQuotesFile := AppSettingsFolder . "\RandomCoffeeQuotes.txt"
 LoadedPluginsFile := AppSettingsFolder . "\LoadedPlugins.txt"
 ;//////////////[Global variables]///////////////
 global Version
+global VersionMode
 global ScriptName
 global AppUpdaterSettingsFile
 global CurrentScriptBranch
@@ -286,11 +289,11 @@ if(FileExist(AppSettingsIni))
 RandomCoffeeText := GetRandomCoffeeFact()
 if(PluginsLoaded)
 {
-    TitleText := "Coffee Tools W/Plugins | " . Version . " | " . VersionTitle . " | Alpha | " . RandomCoffeeText
+    TitleText := "Coffee Tools W/Plugins | " . Version . " | " . VersionTitle . " | " . VersionMode . " | " . RandomCoffeeText
 }
 else
 {
-    TitleText := "Coffee Tools | " . Version . " | " . VersionTitle . " | Alpha | " . RandomCoffeeText
+    TitleText := "Coffee Tools | " . Version . " | " . VersionTitle . " | " . VersionMode . " | " . RandomCoffeeText
 }
 myGui.Title := TitleText
 myGui.Show("w835 h517")
@@ -339,7 +342,9 @@ Run(A_Startup)
 }
 OpenSounds(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-Run("mmsys.cpl")
+    ogcButtonOpenSounds.Enabled := false
+    Run("mmsys.cpl")
+    ogcButtonOpenSounds.Enabled := true
 }
 ClearWindowsTempFolder(A_GuiEvent, GuiCtrlObj, Info, *)
 {
@@ -425,7 +430,7 @@ ReportAnIssueOrBug(A_GuiEvent, GuiCtrlObj, Info, *)
 ;Settings for this script
 KeepThisAlwaysOnTop(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-    WinSetAlwaysOnTop(, "A")
+    WinSetAlwaysOnTop(-1, "A")
 }
 OnExitCloseToTray(A_GuiEvent, GuiCtrlObj, Info, *)
 {
