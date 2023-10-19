@@ -29,7 +29,7 @@ Changelog := "
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.323"
+Version := "0.324"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -130,22 +130,12 @@ UpdateTrayicon()
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Home]///////////////
+global TabHeight := 26
 if(HomeTAB)
 {
     Tab.UseTab("Home")
-    ;Quick Actions
-    myGui.SetFont()
-    myGui.Add("GroupBox", "x8 y32 w300 h110", "Quick actions")
-    ogcButtonIPConfig := myGui.Add("Button", "x16 y56 w80 h23", "IPConfig")
-    ogcButtonIPConfig.OnEvent("Click", RunIpConfig.Bind("Normal"))
-    ogcButtonAppdata := myGui.Add("Button", "x16 y80 w80 h23", "Appdata")
-    ogcButtonAppdata.OnEvent("Click", OpenAppdataFolder.Bind("Normal"))
-    ogcButtonStartupfolder := myGui.Add("Button", "x96 y56 w80 h23", "Startup folder")
-    ogcButtonStartupfolder.OnEvent("Click", OpenStartupFolder.Bind("Normal"))
-    ogcButtonOpenSounds := myGui.Add("Button", "x96 y80 w80 h23", "Open Sounds")
-    ogcButtonOpenSounds.OnEvent("Click", OpenSounds.Bind("Normal"))
-    ogcButtonClearWindowsTempFolder := myGui.Add("Button", "x16 y104 w164 h28", "Clear Windows Temp Folder")
-    ogcButtonClearWindowsTempFolder.OnEvent("Click", ClearWindowsTempFolder.Bind("Normal"))
+
+    HomeScreenCategory("QuickActions")
     ;Always on top
     ;myGui.SetFont()
     ;myGui.Add("GroupBox", "x8 y152 w300 h62", "Toggle any application to Always on top by hotkey")
@@ -748,5 +738,30 @@ DownloadPlugin(PluginName,obj,*)
 
         obj.Enabled := true
         obj.Text := "Remove"
+    }
+}
+;________________________________________________________________________________________________________________________
+;________________________________________________________________________________________________________________________
+;//////////////[HomeScreenCategories]///////////////
+HomeScreenCategory(CategoryName,CategoryPosition := 0)
+{
+    switch CategoryName {
+        case "QuickActions":
+            ;Quick Actions
+            QuickActionsLocationY := TabHeight + CategoryPosition
+            myGui.SetFont()
+            myGui.Add("GroupBox", "x8 y" QuickActionsLocationY " w300 h110", "Quick actions")
+            global ogcButtonIPConfig := myGui.Add("Button", "x16 y" 24 + QuickActionsLocationY " w80 h23", "IPConfig")
+            ogcButtonIPConfig.OnEvent("Click", RunIpConfig.Bind("Normal"))
+            global ogcButtonAppdata := myGui.Add("Button", "x16 y" 48 + QuickActionsLocationY " w80 h23", "Appdata")
+            ogcButtonAppdata.OnEvent("Click", OpenAppdataFolder.Bind("Normal"))
+            global ogcButtonStartupfolder := myGui.Add("Button", "x96 y" 24 + QuickActionsLocationY " w80 h23", "Startup folder")
+            ogcButtonStartupfolder.OnEvent("Click", OpenStartupFolder.Bind("Normal"))
+            global ogcButtonOpenSounds := myGui.Add("Button", "x96 y" 48 + QuickActionsLocationY " w80 h23", "Open Sounds")
+            ogcButtonOpenSounds.OnEvent("Click", OpenSounds.Bind("Normal"))
+            global ogcButtonClearWindowsTempFolder := myGui.Add("Button", "x16 y" 72 + QuickActionsLocationY " w164 h28", "Clear Windows Temp Folder")
+            ogcButtonClearWindowsTempFolder.OnEvent("Click", ClearWindowsTempFolder.Bind("Normal"))
+        default:
+            MsgBox("Name Not Found!")
     }
 }
