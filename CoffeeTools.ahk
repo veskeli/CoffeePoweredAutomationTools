@@ -29,7 +29,7 @@ Changelog := "
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.324"
+Version := "0.33"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -48,6 +48,7 @@ CurrentScriptBranch := "main"
 CloseToTray := false
 global PluginsLoaded := false
 PluginsInManagerCount := 1
+global IsPluginSettingsOpen := false
 ;//////////////[Tabs]///////////////
 HomeTAB := true
 SettingsTAB := true
@@ -664,8 +665,16 @@ PluginManagerInt()
     ;ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y48 w80 h23 +Disabled", "Settings")
     ;ogcButtonInstall := PluginManagerGui.Add("Button", "x312 y48 w80 h23", "Install")
     GetAllPlugins()
-    PluginManagerGui.OnEvent('Close', (*) => PluginManagerGui.Destroy())
+    PluginManagerGui.OnEvent('Close', (*) => ClosePluginManager())
     PluginManagerGui.Title := "Plugin Manager"
+}
+ClosePluginManager(*)
+{
+    PluginManagerGui.Destroy()
+
+    global IsPluginSettingsOpen
+    if(IsPluginSettingsOpen)
+        ClosePluginSettings()
 }
 /**
  * Read file from github containg all plugin names
@@ -688,6 +697,40 @@ GetAllPlugins()
     }
 }
 /**
+ * Open Plugin settings
+**/
+OpenPluginSettings(PluginName,*)
+{
+    global IsPluginSettingsOpen
+    if(IsPluginSettingsOpen)
+        ClosePluginSettings()
+
+    global PluginSettingsGui := Gui()
+    PluginSettingsGui.SetFont("s12")
+    PluginSettingsGui.Add("Text", "x8 y0 w160 h23 +0x200", PluginName)
+    PluginSettingsGui.SetFont("s9")
+    PluginSettingsCheckBox1 := PluginSettingsGui.Add("CheckBox", "x8 y24 w142 h23 +Disabled +Checked", "Check Updates on startup")
+    PluginSettingsogcButtonCheckForUpdates := PluginSettingsGui.Add("Button", "x8 y72 w103 h23 +Disabled", "Check For Updates")
+    PluginSettingsogcButtonOpenFilelocation := PluginSettingsGui.Add("Button", "x8 y48 w102 h23", "Open File location")
+    PluginSettingsogcButtonOpenFilelocation.OnEvent("Click",OpenPluginLocation.Bind(PluginName))
+    PluginSettingsogcButtonCancel := PluginSettingsGui.Add("Button", "x152 y72 w80 h23", "Cancel")
+    PluginSettingsogcButtonCancel.OnEvent("Click",(*) => ClosePluginSettings())
+    PluginSettingsGui.OnEvent('Close', (*) => ClosePluginSettings())
+    PluginSettingsGui.Title := "Settings"
+    PluginSettingsGui.Show("w238 h101")
+
+    IsPluginSettingsOpen := true
+}
+ClosePluginSettings(*)
+{
+    PluginSettingsGui.Destroy()
+    global IsPluginSettingsOpen := false
+}
+OpenPluginLocation(PluginName,*)
+{
+    Run(AppPluginsFolder)
+}
+/**
  * Create plugin line
  * * Used in GetAllPlugins()
 **/
@@ -699,13 +742,16 @@ AddNewPlugin(PluginName)
     FixedPluginName := StrSplit(PluginName,A_Space)
 
     PluginManagerGui.Add("Text", "x8 y" CorrectY " w207 h23 +0x200", PluginName)
-    ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y" CorrectY " w80 h23 +Disabled", "Settings")
+    ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y" CorrectY " w80 h23", "Settings")
     ogcButtonInstall := PluginManagerGui.Add("Button", "x312 y" CorrectY " w80 h23", "Install")
     ogcButtonInstall.OnEvent("Click", DownloadPlugin.Bind(PluginName))
 
     destination := AppPluginsFolder "/" FixedPluginName[1] ".ahk"
     if(FileExist(destination))
         ogcButtonInstall.Text := "Remove"
+
+    ;Settings
+    ogcButtonSettings.OnEvent("Click", OpenPluginSettings.Bind(FixedPluginName[1]))
 
     PluginsInManagerCount++
 }
