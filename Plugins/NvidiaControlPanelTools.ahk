@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 ;____________________________________________________________
 ;//////////////[Def variables]///////////////
-NvidiaControlPanelToolsVersion := "0.11"
+NvidiaControlPanelToolsVersion := "0.12"
 NCPTProgressText := "null"
 global NCPTControlPanelLocation := ""
 /*
@@ -135,6 +135,11 @@ NCPTCheckDefaultResolutionProfile()
 **/
 NCPTChangeResolution(UseDefault,*)
 {
+    ;Control panel settings
+    local CPWidth := 1000
+    local CPHeight := 700
+
+    ;Get selection
     local selection := 0
     if(UseDefault)
     {
@@ -145,15 +150,13 @@ NCPTChangeResolution(UseDefault,*)
         local getCount := IniRead(NCPTResolutionProfileFile,"ResolutionProfiles",NCPTComboBox1.Value "Height")
         selection := getCount
     }
-    local CPWidth := 1000
-    local CPHeight := 700
-
     if(selection == 0)
     {
         MsgBox("Profile not selected or correct!?!")
         return
     }
 
+    ;Open Control Panel
     if(FileExist(NCPTControlPanelLocation))
         Run(NCPTControlPanelLocation)
     else
@@ -165,12 +168,16 @@ NCPTChangeResolution(UseDefault,*)
     ;Progress
     NCPTShowProgress()
     NCPTUpdateProgress("Waiting for Nvidia Control Panel")
+
     ;Wait for window to open
     loop 1000{
         if(WinExist("NVIDIA Control Panel"))
             break
         sleep 100
     }
+    sleep 10
+
+    ;Move window to correct position
     if(WinExist("NVIDIA Control Panel"))
         WinMove(0,0,CPWidth,CPHeight,"NVIDIA Control Panel")
     else
@@ -179,10 +186,12 @@ NCPTChangeResolution(UseDefault,*)
         return
     }
 
+    ;Get and click "Change resolution" category
     NCPTUpdateProgress("Finding Correct Tab")
     hCtl := ControlGetHwnd("Change resolution","NVIDIA Control Panel")
     ControlClick(hCtl)
 
+    ;Move mouse to resolution box and scroll up
     NCPTUpdateProgress("Finding Correct Resolution")
     MouseMove(412, 470)
     sleep 25
@@ -191,6 +200,7 @@ NCPTChangeResolution(UseDefault,*)
         Click("WheelUp")
     }
 
+    ;[MACRO] Select correct resolution with mouse position
     NCPTUpdateProgress("Selecting correct resolution")
     sleep(50)
     MouseMove(412,selection)
@@ -201,24 +211,30 @@ NCPTChangeResolution(UseDefault,*)
     ;TODO: Make sure using highest hz
     ;local ListItems := ControlGetItems("ComboBox3","NVIDIA Control Panel")
 
-
+    ;Press apply
+    ;TODO: Fix controlclick not working
     NCPTUpdateProgress("Saving resolution changes")
     ;hApply := ControlGetHwnd("&Apply","NVIDIA Control Panel")
     ;ControlClick(hApply)
 
-    Click(829, 617) ;Apply
+    Click(829, 617) ;Apply using mouse click
 
+    ;Wait for keep settings window with delays
     sleep 350
     WinWait("ahk_class #32770")
     sleep 150
+    ;Click apply
     Click(276, 86)
 
+    ;Close Nvidia control panel (With small delays)
     NCPTUpdateProgress("Ready (Closing control panel)")
     sleep 200
     WinClose("NVIDIA Control Panel")
     sleep 200
     NCPTUpdateProgress("Ready (Closing control panel)")
     sleep 600
+
+    ;Close progressbar
     NCPTCloseProgress()
 }
 /**
@@ -335,7 +351,8 @@ NCPTSaveNewProfile(Default := false,*)
     {
         IniWrite(NCPTNewProfileHeight.Text,NCPTResolutionProfileFile,"DefaultProfile","Height")
         IniWrite(true,NCPTResolutionProfileFile,"DefaultProfile","Set")
-        NCPTogcButtonSetDefaultprofile.text := "Edit Default profile"
+        sleep 25
+        NCPTCheckDefaultResolutionProfile()
     }
     else
     {
