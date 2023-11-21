@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 ;____________________________________________________________
 ;//////////////[Def variables]///////////////
-NvidiaControlPanelToolsVersion := "0.1"
+NvidiaControlPanelToolsVersion := "0.11"
 NCPTProgressText := "null"
 global NCPTControlPanelLocation := ""
 /*
@@ -205,8 +205,7 @@ NCPTChangeResolution(UseDefault,*)
     NCPTUpdateProgress("Saving resolution changes")
     ;hApply := ControlGetHwnd("&Apply","NVIDIA Control Panel")
     ;ControlClick(hApply)
-    if(true == true)
-        return
+
     Click(829, 617) ;Apply
 
     sleep 350
