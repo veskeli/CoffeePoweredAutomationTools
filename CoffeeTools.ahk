@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.34"
+Version := "0.341"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -792,13 +792,8 @@ AddNewPlugin(PluginName)
 **/
 DownloadPlugin(PluginName,obj,*)
 {
-    if(InStr(PluginName,"Dev") or InStr(PluginName,"Alpha"))
-    {
-        local alertResult := MsgBox("The chosen plugin is in an alpha/dev state, and it may be unreliable or potentially disrupt the script.`nYou can run the script without plugins and remove any that cause issues.`nContinue anyways?","Plugin Caution: Alpha/Dev State Advisory","YesNo")
-        if(alertResult == "No")
-            return
-    }
     FixedPluginName := StrSplit(PluginName,A_Space)
+    local WholePluginName := PluginName
     PluginName := FixedPluginName[1]
     url := PluginGithubLink "/" PluginName ".ahk"
     destination := AppPluginsFolder "/" PluginName ".ahk"
@@ -815,6 +810,13 @@ DownloadPlugin(PluginName,obj,*)
     }
     else
     {
+        if(InStr(WholePluginName,"Dev") or InStr(WholePluginName,"Alpha"))
+        {
+            local alertResult := MsgBox("The chosen plugin is in an alpha/dev state, and it may be unreliable or potentially disrupt the script.`nYou can run the script without plugins and remove any that cause issues.`nContinue anyways?","Plugin Caution: Alpha/Dev State Advisory","YesNo")
+            if(alertResult == "No")
+                return
+        }
+
         obj.Enabled := false
         obj.Text := "Downloading..."
 
