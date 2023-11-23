@@ -1,7 +1,7 @@
 # Coffee Tools ToDo
 - - -
 ## Main Script
-Last updated on version: `0.244`
+Last updated on version: `0.341`
 - [ ] Branch control
 	- [ ] Experimental branch
 	- [ ] (Pre release)
@@ -13,13 +13,13 @@ Last updated on version: `0.244`
 		- [ ] Manage auto install
 - [ ] Windows settings from old script
 - [ ] New Home screen
-	- [ ] Toggle always on top
-	- [ ] Quick actions
+	- [ ] Grid based custom blocks
 - [ ] Detailed settings
 	- [ ] File integrity check
 	- [ ] Uninstaller
 	- [ ] Changelog in app
 		- [x] Simple changelog
+		- Currently removed
 - [ ] Plugin Manager `Currently supported plugin count ~20`
 	- Plugins are way to create more tabs and update them separately
 	- Way to test and create tabs before adding them to main script
@@ -29,6 +29,8 @@ Last updated on version: `0.244`
 		- [x] Different gui
 		- [x] Download and remove
 		- [ ] Settings
+			- [x] Open File location
+			- [ ] Auto Update
 	- [ ] Download and manage
 	- [ ] Reorder tabs
 ### After 1.0
@@ -80,6 +82,10 @@ Last updated on version: `0.14`
 	- [ ] Revert paste order
 		- [ ] Paste all copied text on by one reverted
 	- [ ] Support for Auto Messager (Advanced scripts)
+- [ ] Nvidia Control Panel Tools
+	- [ ] Change resolution
+		- [x] Save profiles
+		- [x] Change Resolution with macro
 - [ ] Game scripts
 	- [ ] All my game scripts in one place
 		- [ ] Download and manage

@@ -3,6 +3,7 @@
 > Links and text may not be correct!
 # Coffee Powered Automation Tools
 ##### CoffeeTools
+![State](https://img.shields.io/badge/State-Alpha-red)
 - - -
 >[!IMPORTANT]
 >Auto Hotkey 2.0 or above required
