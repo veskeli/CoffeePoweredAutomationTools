@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.536"
+UpdaterVersion := "0.537"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -211,8 +211,8 @@ OpenMainScript()
 AskToDownloadUpdates(T_ScriptName,T_CurrentVersion,T_NewVersion,T_Branch := "main")
 {
     ;[TODO] Check for settings (Auto install)
-    UpdateText := "Update for " T_ScriptName "!`n`n"
-    if(T_Branch == "main")
+    UpdateText := "Update available for " T_ScriptName ": " T_CurrentVersion " to " T_NewVersion " . Proceed with update?"
+    /*if(T_Branch == "main")
     {
         UpdateText := UpdateText "New version is: " . T_NewVersion . "`nOld is: " . T_CurrentVersion .  "`nUpdate now?"
     }
@@ -224,6 +224,7 @@ AskToDownloadUpdates(T_ScriptName,T_CurrentVersion,T_NewVersion,T_Branch := "mai
     {
         UpdateText := UpdateText "New Experimental version is: " . T_NewVersion . "`nOld is: " . T_CurrentVersion .  "`nUpdate now?"
     }
+    */
     msgResult := MsgBox(UpdateText, "Update for " T_ScriptName "!", 4)
     if (msgResult = "Yes")
     {
@@ -528,6 +529,7 @@ CheckForPluginUpdate(FileName)
             {
                 ;Ask to update plugin
                 UpdateText := PluginName ":`nCurrent: " OldPluginVersion " New: " NewPluginVersion
+                UpdateText := "Update available for " PluginName ": " OldPluginVersion " to " NewPluginVersion ".`nProceed with update?"
 
                 global PluginGui := Gui()
                 PluginGui.Opt("-MinimizeBox -MaximizeBox")
