@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Launcher]///////////////
-LauncherVersion := "0.141"
+LauncherVersion := "0.14"
 
 
 
