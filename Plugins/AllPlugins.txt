@@ -1,3 +1,2 @@
-Testing [Do Not Use!]
 BetterClipboard [Dev Build]
-NvidiaControlPanelTools [Dev Build]
+NvidiaControlPanelTools [Alpha]

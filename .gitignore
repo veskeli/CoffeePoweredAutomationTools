@@ -13,3 +13,7 @@ CoffeeToolsWithPlugins.ahk
 Settings/Settings.ini
 UpdaterInfo.ini
 TempUpdater.ahk
+Plugins/BetterClipboard/ClipboardHistory.ini
+Plugins/NvidiaControlPanelTools/NvidiaControlPanelTools.ini
+Plugins/NvidiaControlPanelTools/ResolutionProfiles.ini
+Settings/LoadedPlugins.txt

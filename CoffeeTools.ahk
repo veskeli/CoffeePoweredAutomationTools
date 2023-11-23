@@ -14,19 +14,6 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 ;SetMouseDelay(-1) ; Remove short delay done automatically after Click and MouseMove/Click/Drag
 Persistent
 ;________________________________________________________________________________________________________________________
-;//////////////[Changelog]///////////////
-Changelog := "
-(
-0.2+ Changelog:
-+ AHK v2
-+ Coffee quotes are back (282 Coffee quotes)
-+ Tray menu is back
-+ Asset download
-+ Updater status/version
-0.3+ Changelog:
-+ Basic Plugin Manager
-)"
-;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
 Version := "0.33"
@@ -49,6 +36,7 @@ CloseToTray := false
 global PluginsLoaded := false
 PluginsInManagerCount := 1
 global IsPluginSettingsOpen := false
+global PluginNameList := Array()
 ;//////////////[Tabs]///////////////
 HomeTAB := true
 SettingsTAB := true
@@ -119,6 +107,7 @@ if(PluginsLoaded) ;Add plugins to tabs
         {
             PluginName := StrReplace(A_LoopField,".ahk")
             TabHandle.Push(PluginName)
+            PluginNameList.Push(PluginName)
         }
     }
     else
@@ -136,7 +125,18 @@ if(HomeTAB)
 {
     Tab.UseTab("Home")
 
-    HomeScreenCategory("QuickActions")
+    ;HomeScreenCategory("QuickActions")
+
+    myGui.SetFont("s15")
+    temphomescreentext := "
+(
+While a home screen is planned for the future, it is not currently a priority.
+Our current focus is on developing new features, presented in the form of plugins.
+
+(Temporarily set the starting tab in settings.)
+)"
+    myGui.Add("Text", "x10 y25 w600 h300", temphomescreentext)
+    myGui.SetFont()
     ;Always on top
     ;myGui.SetFont()
     ;myGui.Add("GroupBox", "x8 y152 w300 h62", "Toggle any application to Always on top by hotkey")
@@ -160,25 +160,30 @@ if(SettingsTAB)
     ogcButtonShortcuttoDesktop := myGui.Add("Button", "x192 y48 w95 h35 +Disabled", "Shortcut to Desktop")
     ogcButtonShortcuttoDesktop.OnEvent("Click", Shortcut_to_desktop.Bind("Normal"))
     ;Plugin Manager
-    ogcButtonCustomizeTabs := myGui.Add("Button", "x368 y24 w101 h23", "Plugin Manager")
+    myGui.Add("GroupBox", "x301 y31 w195 h63", "Plugin Manager")
+    myGui.SetFont("s13")
+    ogcButtonCustomizeTabs := myGui.Add("Button", "x312 y48 w167 h36", "Plugin Manager")
     ogcButtonCustomizeTabs.OnEvent("Click",CustomizePlugins.Bind("Normal"))
+    myGui.SetFont()
     ;Report an issue
     myGui.SetFont("s15")
     ogcButtonReportanissueorbug := myGui.Add("Button", "x624 y32 w206 h35", "Report an issue or bug")
     ogcButtonReportanissueorbug.OnEvent("Click", ReportAnIssueOrBug.Bind("Normal"))
     ;Settings for this script
     myGui.SetFont()
-    myGui.Add("GroupBox", "x8 y122 w175 h160", "Settings for this script.")
-    ogcCheckBoxKeepthisalwaysontop := myGui.Add("CheckBox", "x16 y144 w143 h23", "Keep this always on top")
+    myGui.Add("GroupBox", "x8 y122 w175 h168", "Settings for this script.")
+    ogcCheckBoxKeepthisalwaysontop := myGui.Add("CheckBox", "x16 y138 w143 h23", "Keep this always on top")
     ogcCheckBoxKeepthisalwaysontop.OnEvent("Click", KeepThisAlwaysOnTop.Bind("Normal"))
-    ogcOnExitCloseToTrayCheckbox := myGui.Add("CheckBox", "x16 y168 w140 h23  vOnExitCloseToTrayCheckbox", "On Exit close to tray")
+    ogcOnExitCloseToTrayCheckbox := myGui.Add("CheckBox", "x16 y158 w140 h23  vOnExitCloseToTrayCheckbox", "On Exit close to tray")
     ogcOnExitCloseToTrayCheckbox.OnEvent("Click", OnExitCloseToTray.Bind("Normal"))
-    ogcButtonRedownloadassets := myGui.Add("Button", "x16 y192 w133 h28", "Redownload assets")
+    ogcButtonRedownloadassets := myGui.Add("Button", "x16 y180 w133 h28", "Redownload assets")
     ogcButtonRedownloadassets.OnEvent("Click", RedownloadAssets.Bind("Normal"))
-    ogcButtonShowChangelog := myGui.Add("Button", "x16 y224 w133 h23", "Show Changelog")
-    ogcButtonShowChangelog.OnEvent("Click", ShowChangelogButton.Bind("Normal"))
-    ogcButtonRunWithPlugins := myGui.Add("Button", "x16 y252 w133 h23", "Run with plugins")
+    ogcButtonRunAlwaysWithPlugins := myGui.Add("Checkbox", "x16 y210 w145 h23 +Disabled", "Run always with plugins")
+    ogcButtonRunWithPlugins := myGui.Add("Button", "x16 y232 w133 h23", "Run with plugins")
     ogcButtonRunWithPlugins.OnEvent("Click",RunWithPlugins.Bind("Normal"))
+    myGui.Add("Text", "x14 y264 w100 h23", "Start Tab:")
+    ogcButtonStartTab := myGui.Add("DropDownList", "x64 y260 w110", ["Home","Settings"])
+    ogcButtonStartTab.OnEvent("Change",SetStartingTab.Bind())
     if(PluginsLoaded)
     {
         ogcButtonRunWithPlugins.Text := "Run without plugins"
@@ -221,11 +226,20 @@ if(PluginsLoaded)
 ;________________________________________________________________________________________________________________________
 ;//////////////[Check Before Opening Script]///////////////
 ;Settings tab
+
+;Starting Tab
+If(PluginsLoaded)
+{
+    ogcButtonStartTab.Add(PluginNameList)
+}
+StartingTabValue := Integer(1)
+;Is Admin
 if(A_IsAdmin)
 {
     ogcRunAsThisAdminButton.Text := "Already running as admin"
     ogcRunAsThisAdminButton.Enabled := false
 }
+;Load Settings
 if(FileExist(AppSettingsIni))
 {
     ;Close To tray
@@ -246,7 +260,19 @@ if(FileExist(AppSettingsIni))
             ExitApp()
         }
     }
+    ;Starting Tab
+    if(PluginsLoaded)
+    {
+        StartingTabValue := Integer(IniRead(AppSettingsIni,"Settings","StartingTabWithPlugins",1))
+    }
+    else
+    {
+        StartingTabValue := Integer(IniRead(AppSettingsIni,"Settings","StartingTab",1))
+    }
 }
+;Starting Tab
+Tab.Choose(StartingTabValue)
+ogcButtonStartTab.Choose(StartingTabValue)
 ;Updater
 if(FileExist(AppUpdaterFile))
 {
@@ -381,7 +407,7 @@ RunAsThisAdminCheckboxButton(A_GuiEvent, GuiCtrlObj, Info, *)
 Shortcut_to_desktop(A_GuiEvent, GuiCtrlObj, Info, *)
 {
     MsgBox("Not Working yet", "", "T25")
-    ;TODO
+    ;TODO:
     /*
     if(IsEXERunnerEnabled)
     {
@@ -448,13 +474,22 @@ RedownloadAssets(*)
     else
     {
         ;Updater File Missing!!
-        ;[TODO]
+        ;[TODO:]
         MsgBox("Updater File Is Missing!")
     }
 }
-ShowChangelogButton(A_GuiEvent, GuiCtrlObj, Info, *)
+SetStartingTab(*)
 {
-    ShowChangelogMsgBox(Changelog)
+    local NewStartTab := ogcButtonStartTab.Value
+
+    if(PluginsLoaded)
+    {
+        IniWrite(NewStartTab,AppSettingsIni,"Settings","StartingTabWithPlugins")
+    }
+    else
+    {
+        IniWrite(NewStartTab,AppSettingsIni,"Settings","StartingTab")
+    }
 }
 RunWithPlugins(A_GuiEvent, GuiCtrlObj, Info, *)
 {
@@ -472,7 +507,7 @@ RunWithPlugins(A_GuiEvent, GuiCtrlObj, Info, *)
         }
         else
         {
-            ;TODO Better msgbox
+            ;TODO: Better msgbox
             MsgBox("Launcher File Is Missing!")
         }
     }
@@ -602,7 +637,7 @@ CheckForUpdates(SkipRunningLatestMessage)
     if(!FileExist(AppUpdaterFile))
     {
         ;Updater File Missing!!
-        ;[TODO]
+        ;[TODO:]
         MsgBox("Updater File Is Missing!")
     }
     else
@@ -612,9 +647,6 @@ CheckForUpdates(SkipRunningLatestMessage)
             IniWrite(true, AppUpdaterSettingsFile, "Options", "PluginsLoaded")
         Run(AppUpdaterFile)
     }
-}
-ShowChangelogMsgBox(messageText) {
-    MsgBox(messageText, "Changelog [" Version "]", "")
 }
 GetRandomCoffeeFact()
 {
@@ -707,7 +739,7 @@ OpenPluginSettings(PluginName,*)
 
     global PluginSettingsGui := Gui()
     PluginSettingsGui.SetFont("s12")
-    PluginSettingsGui.Add("Text", "x8 y0 w160 h23 +0x200", PluginName)
+    PluginSettingsGui.Add("Text", "x8 y0 w228 h23 +0x200", PluginName)
     PluginSettingsGui.SetFont("s9")
     PluginSettingsCheckBox1 := PluginSettingsGui.Add("CheckBox", "x8 y24 w142 h23 +Disabled +Checked", "Check Updates on startup")
     PluginSettingsogcButtonCheckForUpdates := PluginSettingsGui.Add("Button", "x8 y72 w103 h23 +Disabled", "Check For Updates")
@@ -760,6 +792,12 @@ AddNewPlugin(PluginName)
 **/
 DownloadPlugin(PluginName,obj,*)
 {
+    if(InStr(PluginName,"Dev") or InStr(PluginName,"Alpha"))
+    {
+        local alertResult := MsgBox("The chosen plugin is in an alpha/dev state, and it may be unreliable or potentially disrupt the script.`nYou can run the script without plugins and remove any that cause issues.`nContinue anyways?","Plugin Caution: Alpha/Dev State Advisory","YesNo")
+        if(alertResult == "No")
+            return
+    }
     FixedPluginName := StrSplit(PluginName,A_Space)
     PluginName := FixedPluginName[1]
     url := PluginGithubLink "/" PluginName ".ahk"
