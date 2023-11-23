@@ -1,6 +1,11 @@
 #Requires Autohotkey v2
 #SingleInstance Force
-BuildVersion := "Build 4"
+BuildVersion := "Build 5"
+
+;vars
+global AppFolder := A_ScriptDir
+global AppPluginsFolder := AppFolder . "\Plugins"
+global AppSettingsFolder := AppFolder . "\Settings"
 
 myGui := Gui()
 myGui.Opt("-MaximizeBox")
@@ -57,7 +62,23 @@ ogcButtonSwitch := myGui.Add("Button", "x320 y120 w80 h22 +Disabled", "Switch")
 ogcCheckBoxKeepthisalwaysontop := myGui.Add("CheckBox", "x150 y200 w143 h23", "Keep this always on top")
 ogcCheckBoxKeepthisalwaysontop.OnEvent("Click", KeepThisAlwaysOnTop.Bind("Normal"))
 
-Tab.UseTab()
+Tab.UseTab(2)
+;Version control
+myGui.Add("GroupBox", "x8 y32 w210 h139", "Update Version")
+PlugVersionDropDownList := myGui.Add("DropDownList", "x16 y48 w197")
+DropdownGetAllPlugins()
+PlugCurrentVersionText := myGui.Add("Text", "x16 y85 w187 h23 +0x200", "Current Version: 0.000")
+myGui.Add("Text", "x16 y104 w70 h23 +0x200", "New version:")
+PlugEdit1 := myGui.Add("Edit", "x88 y105 w120 h21", "0.000")
+PlugVersionDropDownList.OnEvent("Change", UpdatePluginVersion.Bind())
+ogcButtonPlugUpdate := myGui.Add("Button", "x10 y136 w50 h23", "Update")
+ogcButtonPlugUpdate.OnEvent("Click", UpdatePluginAhkVersion.Bind())
+ogcButtonPlugUpdateUp1 := myGui.Add("Button", "x60 y136 w50 h23", "Up 0.1")
+ogcButtonPlugUpdateUp1.OnEvent("Click", AddToUpdatePluginNumber.Bind(0.1))
+ogcButtonPlugUpdateUp2 := myGui.Add("Button", "x110 y136 w50 h23", "Up 0.01")
+ogcButtonPlugUpdateUp2.OnEvent("Click", AddToUpdatePluginNumber.Bind(0.01))
+ogcButtonPlugUpdateUp3 := myGui.Add("Button", "x160 y136 w50 h23", "Up 0.001")
+ogcButtonPlugUpdateUp3.OnEvent("Click", AddToUpdatePluginNumber.Bind(0.001))
 
 myGui.OnEvent('Close', (*) => ExitApp())
 myGui.Title := "Coffee Tools Dev Tools | " BuildVersion
@@ -215,10 +236,12 @@ UpdateApplicationVersion(*)
  * @param VersionVariableName Is case sensitive
  * @param AhkFile Path to Ahk File
 **/
-ReadVersionFromAhkFile(VersionVariableName,AhkFile)
+ReadVersionFromAhkFile(VersionVariableName,AhkFile,isPlugin := false)
 {
     ;Variables
     local Path := A_ScriptDir "\" AhkFile ".ahk"
+    if(isPlugin)
+        Path := A_ScriptDir "\Plugins\" AhkFile ".ahk"
     VersionFile := FileRead(Path)
     FoundVersion := ""
 
@@ -265,4 +288,124 @@ ParseVersionLine(Line)
 KeepThisAlwaysOnTop(A_GuiEvent, GuiCtrlObj, Info, *)
 {
     WinSetAlwaysOnTop(-1, "A")
+}
+DropdownGetAllPlugins()
+{
+    local AllPluginNames := Array()
+
+    LoadedPluginsFile := AppSettingsFolder . "\LoadedPlugins.txt"
+    PluginFile := FileRead(LoadedPluginsFile)
+    loop parse, PluginFile, "`n"
+    {
+        local NewWithoutEx := StrSplit(A_LoopField,".")
+        AllPluginNames.Push(NewWithoutEx[1])
+    }
+
+    PlugVersionDropDownList.Add(AllPluginNames)
+}
+UpdatePluginVersion(*)
+{
+    PluginName := GetPluginName(PlugVersionDropDownList.Value)
+    PluginVersion := GetPluginVersionName(VersionDropDownList.Value)
+
+    local CurrentVersion := ReadVersionFromAhkFile(PluginVersion,PluginName,true)
+    PlugCurrentVersionText.Text := "Current Version: " CurrentVersion
+    PlugEdit1.Text := CurrentVersion
+}
+GetPluginName(ListValue)
+{
+    return PlugVersionDropDownList.Text
+}
+GetPluginVersionName(ListValue)
+{
+    return PlugVersionDropDownList.Text "Version"
+}
+AddToUpdatePluginNumber(AddAmount,*)
+{
+    local OldUpdateText := Float(PlugEdit1.Value)
+    local NewUpdateText := Round(OldUpdateText + AddAmount,3)
+    NewUpdateText := RTrim(NewUpdateText,"0")
+    PlugEdit1.Value := NewUpdateText
+}
+
+;Update plugin Version
+UpdatePluginAhkVersion(*)
+{
+    ;Variables
+    local SelectedScript := PlugVersionDropDownList.Text
+    local SelectedScriptTextFile := PlugVersionDropDownList.Text
+    local ApplicationVersion := GetPluginVersionName(PlugVersionDropDownList.Value)
+    local SelectedVersionText := ApplicationVersion ' := "'
+
+    local PathToAhkFile := A_ScriptDir "\Plugins\" PlugVersionDropDownList.Text ".ahk"
+    local PathToVersionFile := A_ScriptDir "\" "Version" "\" SelectedScriptTextFile ".txt"
+    local MainScriptAhkFile := A_ScriptDir . "\Plugins\" . SelectedScript . ".ahk"
+    local MainScriptAhkFileTemp := A_ScriptDir . "\Temp\" . "Temp" . SelectedScript . ".ahk"
+
+    DirCreate(A_ScriptDir . "\Temp")
+
+    ;Version text file
+    if(FileExist(PathToVersionFile) and FileExist(MainScriptAhkFile))
+    {
+        FileDelete(PathToVersionFile)
+        FileAppend(PlugEdit1.Text,PathToVersionFile)
+    }
+    else
+    {
+        MsgBox("Text file or file missing")
+        return
+    }
+
+    ;Ahk File
+    if(FileExist(MainScriptAhkFile))
+    {
+        MainFile := FileRead(MainScriptAhkFile)
+        MainFileStart := ""
+        MainFileEnd := ""
+        SaveToStart := true
+        local VersionText := SelectedVersionText
+        local NewVersionText := SelectedVersionText PlugEdit1.Text '"'
+
+        ;Copy and save new version
+        loop parse, MainFile, "`n"
+        {
+            if(InStr(A_LoopField,VersionText))
+            {
+                MainFileEnd := NewVersionText
+                SaveToStart := false
+                continue
+            }
+            else
+            {
+                if(A_Index == 1)
+                {
+                    MainFileStart := A_LoopField
+                }
+                else
+                {
+                    if(SaveToStart)
+                    {
+                        MainFileStart := MainFileStart . "`n" . A_LoopField
+                    }
+                    else
+                    {
+                        MainFileEnd := MainFileEnd . "`n" . A_LoopField
+                    }
+                }
+            }
+        }
+        if(SaveToStart)
+        {
+            MsgBox("Version not found")
+            return
+        }
+        NewFile := MainFileStart . "`n" . MainFileEnd
+
+        ;Write new file
+        FileMove(MainScriptAhkFile,MainScriptAhkFileTemp,true)
+        FileAppend(NewFile,MainScriptAhkFile)
+
+        ;Update Gui
+        UpdatePluginVersion()
+    }
 }
