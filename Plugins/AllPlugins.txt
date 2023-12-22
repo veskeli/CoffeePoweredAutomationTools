@@ -1,2 +1,3 @@
 BetterClipboard [Dev Build]
 NvidiaControlPanelTools [Alpha]
+LaunchManagerforWindows [Dev Build]

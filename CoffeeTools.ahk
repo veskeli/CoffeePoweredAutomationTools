@@ -474,7 +474,7 @@ RedownloadAssets(*)
     else
     {
         ;Updater File Missing!!
-        ;[TODO:]
+        ;TODO:
         MsgBox("Updater File Is Missing!")
     }
 }
@@ -824,6 +824,17 @@ DownloadPlugin(PluginName,obj,*)
 
         obj.Enabled := true
         obj.Text := "Remove"
+    }
+
+    ;Fix starting tab
+    if(FileExist(AppSettingsIni))
+    {
+        StartingTabValue := Integer(IniRead(AppSettingsIni,"Settings","StartingTabWithPlugins",1))
+        if(StartingTabValue != 1 and StartingTabValue != 2)
+        {
+            IniWrite(2,AppSettingsIni,"Settings","StartingTabWithPlugins")
+            MsgBox("Starting tab reset to settings.","Start Tab Reset")
+        }
     }
 }
 ;________________________________________________________________________________________________________________________

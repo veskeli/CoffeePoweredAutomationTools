@@ -14,7 +14,7 @@ BetterClipboardLoadTab()
     ClipboardHistoryFile := AppPluginsFolder "/BetterClipboard" "/ClipboardHistory.ini"
 
     Tab.UseTab("BetterClipboard")
-    global BCRecordCliboard := CheckBox1 := myGui.Add("CheckBox", "x8 y32 w145 h23 +Checked", "Record Clipboard History")
+    global BCRecordCliboard := CheckBox1 := myGui.Add("CheckBox", "x8 y32 w145 h23", "Record Clipboard History")
     global BCSkipDupes := myGui.Add("CheckBox", "x160 y32 w100 h23", "Skip Duplicates")
     global BCDropDownList1 := myGui.Add("DropDownList", "x270 y32 w120", ["Check last one", "Check all"])
     BCDropDownList1.Choose(1)
