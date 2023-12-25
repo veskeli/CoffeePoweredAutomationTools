@@ -8,7 +8,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Installer Variables]///////////////
-InstallerVersion := "0.51"
+InstallerVersion := "0.52"
 global InstallerVersion
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -18,10 +18,12 @@ AppSettingsFolder := AppFolder . "\Settings"
 MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
 DownloadLocation := A_ScriptDir . "\" . ScriptName . ".ahk"
 UpdaterDownloadLocation := A_ScriptDir . "\Updater.ahk"
+LauncherDownloadLocation := A_ScriptDir . "\Launcher.ahk"
 ;//////////////[Links]///////////////
 GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/main/"
 AppGithubDownloadURL := GithubReposityLink ScriptName ".ahk"
 UpdaterGithubDownloadURL := GithubReposityLink "Updater.ahk"
+LauncherGithubDownloadURL := GithubReposityLink "Launcher.ahk"
 ;//////////////[ini]///////////////
 AppSettingsIni := AppSettingsFolder . "\Settings.ini"
 ;____________________________________________________________
@@ -101,6 +103,8 @@ InstallScript(A_GuiEvent, GuiCtrlObj, Info, *)
         Download(AppGithubDownloadURL,AppFolder . "\" . ScriptName . ".ahk")
         ;Updater
         Download(UpdaterGithubDownloadURL,AppFolder . "\Updater.ahk")
+        ;Installer
+        Download(LauncherGithubDownloadURL,AppFolder "\Launcher.ahk")
     }
     Catch
     {
@@ -111,6 +115,9 @@ InstallScript(A_GuiEvent, GuiCtrlObj, Info, *)
             ;Updater
             Download(UpdaterGithubDownloadURL,UpdaterDownloadLocation)
             FileMove(UpdaterDownloadLocation, AppFolder . "\Updater.ahk")
+            ;Launcher
+            Download(LauncherGithubDownloadURL,LauncherDownloadLocation)
+            FileMove(LauncherDownloadLocation, AppFolder . "\Launcher.ahk")
         }
         Catch{
             if(A_IsAdmin)
