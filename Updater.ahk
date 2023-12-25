@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.54"
+UpdaterVersion := "0.541"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -296,8 +296,7 @@ UpdateFileFromGithub(Link,FilePath)
     ;Move existing file to temp
     if(FileExist(FilePath))
     {
-        SplitPath FilePath, &name
-        FileMove(FilePath,AppTempFolder "/" name,true)
+        FileDelete(FilePath)
     }
     ;Download new file
     ;[TODO] Try and Catch
