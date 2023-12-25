@@ -8,7 +8,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Installer Variables]///////////////
-InstallerVersion := "0.5"
+InstallerVersion := "0.51"
 global InstallerVersion
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -80,15 +80,15 @@ InstallScript(A_GuiEvent, GuiCtrlObj, Info, *)
     if (FileExist(MainScriptAhkFile))
     {
         InstalledCheck := IniRead(AppSettingsIni, "install", "installFolder", "Default")
-    }
-    if(InstalledCheck != "Error" or InstalledCheck != "")
-    {
-        msgResult := MsgBox("Already installed!`ncontinue?", "Already installed", 4)
-        if (msgResult = "No")
+        if(InstalledCheck != "Error" or InstalledCheck != "")
         {
-            SetProgressBarState("0")
-            SetControlState("Enable")
-            Return
+            msgResult := MsgBox("Already installed!`ncontinue?", "Already installed", 4)
+            if (msgResult = "No")
+            {
+                SetProgressBarState("0")
+                SetControlState("Enable")
+                Return
+            }
         }
     }
     ;Create all folders
