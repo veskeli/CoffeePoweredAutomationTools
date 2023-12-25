@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.542"
+UpdaterVersion := "0.543"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -548,6 +548,10 @@ CheckForPluginUpdate(FileName)
 {
     GetPluginName := StrSplit(FileName,".ahk")
     PluginName := GetPluginName[1]
+
+    ;check if update allowed
+    if(IniRead(AppSettingsIni,"Plugins",PluginName,0) == 0)
+        return
 
     OldPluginVersion := ReadVersionFromAhkFile(PluginName "Version",AppPluginsFolder "\" FileName)
     NewPluginVersion := GetNewVersionFromGithub(MainScriptBranch,"/Version/" PluginName ".txt")
