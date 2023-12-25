@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.342"
+Version := "0.343"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -651,6 +651,8 @@ CreateDefaultDirectories()
         DirCreate(AppFolder)
     if(!FileExist(AppSettingsFolder))
         DirCreate(AppSettingsFolder)
+    if(!FileExist(AppPluginsFolder))
+        DirCreate(AppPluginsFolder)
 }
 FileOrFolderMissing(IsFolder)
 {
@@ -796,6 +798,8 @@ AddNewPlugin(PluginName)
 **/
 DownloadPlugin(PluginName,SettingsObj,obj,*)
 {
+    CreateDefaultDirectories()
+    
     FixedPluginName := StrSplit(PluginName,A_Space)
     local WholePluginName := PluginName
     PluginName := FixedPluginName[1]
