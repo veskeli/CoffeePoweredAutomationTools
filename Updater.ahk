@@ -411,6 +411,7 @@ SetProgressBarText(text)
 ;//////////////[Functions]///////////////
 /**
  * @param Link Link to text file
+ * v1
 **/
 ReadFileFromLink(Link)
 {
@@ -439,6 +440,7 @@ ReadFileFromLink(Link)
  * Link: GithubReposityLink + T_Branch + linkEnd
  *
  * Link Example: [https://raw.githubusercontent.com/ USERNAME / REPOSITYNAME /] + [main] + [/version.txt]
+ * v1
 **/
 GetNewVersionFromGithub(T_Branch,linkEnd)
 {
@@ -466,6 +468,7 @@ GetNewVersionFromGithub(T_Branch,linkEnd)
  *
  * @param VersionVariableName Is case sensitive
  * @param AhkFile Path to Ahk File
+ * v1
 **/
 ReadVersionFromAhkFile(VersionVariableName,AhkFile)
 {
@@ -485,6 +488,7 @@ ReadVersionFromAhkFile(VersionVariableName,AhkFile)
 }
 /**
  * Parses ahk variable
+ * v1
 **/
 ParseVersionLine(Line)
 {
