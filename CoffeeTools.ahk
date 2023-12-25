@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.345"
+Version := "0.346"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -815,8 +815,11 @@ CheckForPluginUpdates(func_PluginName,*)
         local l_srt_Prompt := MsgBox("Old: " l_float_OldPluginVersion " New: " l_float_NewPluginVersion,"PluginUpdate","YesNo")
         if(l_srt_Prompt == "Yes")
         {
-            ;TODO: Update Plugin
-            MsgBox("Not implemented yet! Restart app to update plugins.","Feature missing")
+            url := PluginGithubLink "/" func_PluginName ".ahk"
+            plugin := AppPluginsFolder "\" func_PluginName ".ahk"
+            
+            FileDelete(plugin)
+            Download(url,plugin)
         }
     }
     else
