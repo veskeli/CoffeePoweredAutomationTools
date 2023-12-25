@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.343"
+Version := "0.344"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -205,7 +205,8 @@ if(SettingsTAB)
     myGui.Add("GroupBox", "x8 y419 w170 h80", "Delete")
     ogcButtonDeleteallsettings := myGui.Add("Button", "x16 y440 w103 h23", "Delete all settings")
     ogcButtonDeleteallsettings.OnEvent("Click", DeleteAppSettings.Bind("Normal"))
-    ogcButtonUninstall := myGui.Add("Button", "x16 y464 w103 h23 +Disabled", "Uninstall")
+    ogcButtonUninstall := myGui.Add("Button", "x16 y464 w103 h23", "Uninstall")
+    ogcButtonUninstall.OnEvent("Click",UninstallScript.Bind())
     ;Updates
     myGui.SetFont()
     myGui.Add("GroupBox", "x648 y400 w179 h110", "Updates")
@@ -571,6 +572,54 @@ DeleteAppSettings(A_GuiEvent, GuiCtrlObj, Info, *)
         MsgBox("No settings saved!","Nothing to delete!","T25")
     }
 }
+;Uninstall
+UninstallScript(*)
+{
+    ;Get current folder name
+    local l_str_FolderName := InStr(A_ScriptDir, "\", false, -1)
+    l_str_FolderName := SubStr(A_ScriptDir, l_str_FolderName + 1)
+    ;Get file count
+    local l_int_MaxFileCount := 6
+    local l_int_FileCountInFolder := 0
+    loop files "*.*"
+    {
+        l_int_FileCountInFolder := l_int_FileCountInFolder + 1
+    }
+
+    local l_srt_Msg := "You are about to uninstall. All plugins and settings will be deleted.`nContinue?"
+    ;If folder name is incorrect or file count is not normal
+    if(l_str_FolderName != AppFolderName or l_int_FileCountInFolder > l_int_MaxFileCount)
+    {
+        if(l_str_FolderName != AppFolderName) ;If name is not correct
+        {
+            l_srt_errMsg := 'Script folder name is not correct. Folder name: "' l_str_FolderName '"`nThis folder will be deleted`nContinue?'
+        }
+        else if(l_int_FileCountInFolder > l_int_MaxFileCount) ;If more files
+        {
+            l_srt_errMsg := "More files then usually. File count: " l_int_FileCountInFolder ". Make sure that there is not any inportant files!`nContinue?"
+        }
+        else
+        {
+            MsgBox("Files cannot be deleted. You can manually delete files.","Uninstall failed!")
+            return
+        }
+        local l_errmsgbox := MsgBox(l_srt_errMsg,"Error!","Y/N/C")
+        if(l_errmsgbox != "Yes")
+        {
+            return
+        }
+    }
+    local l_msgbox := MsgBox(l_srt_Msg,"Are you sure!","Y/N/C")
+    if(l_msgbox != "Yes")
+    {
+        return
+    }
+    else
+    {
+        DirDelete(A_ScriptDir,1)
+        ExitApp
+    }
+}
 ;Updates
 AutoUpdates(A_GuiEvent, GuiCtrlObj, Info, *)
 {
@@ -799,7 +848,7 @@ AddNewPlugin(PluginName)
 DownloadPlugin(PluginName,SettingsObj,obj,*)
 {
     CreateDefaultDirectories()
-    
+
     FixedPluginName := StrSplit(PluginName,A_Space)
     local WholePluginName := PluginName
     PluginName := FixedPluginName[1]
