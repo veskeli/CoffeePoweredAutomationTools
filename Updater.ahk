@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.537"
+UpdaterVersion := "0.54"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -25,6 +25,8 @@ global LauncherAhkFile := AppFolder . "\Launcher.ahk"
 ;//////////////[ini]///////////////
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
 AppSettingsIni := AppSettingsFolder . "\Settings.ini"
+;//////////////[Dependencies]///////////////
+;Launcher
 ;//////////////[Assets]///////////////
 RandomCoffeeQuotesFile := AppSettingsFolder . "\RandomCoffeeQuotes.txt"
 ;//////////////[Update]///////////////
@@ -56,8 +58,10 @@ global PluginsLoaded := false
 ;//////////////[Main update files]///////////////
 ;Main Script
 global ScriptUpdate := false
+global ScriptDownload := false
 ;Launcher
 global LauncherUpdate := false
+global LauncherDownload := false
 ;____________________________________________________________
 ;____________________________________________________________
 ;//////////////[Progress Bar]///////////////
@@ -96,33 +100,49 @@ if FileExist(AppUpdaterSettingsFile) ;Read Settings
 
 
 ;//////////////[Check for updates]///////////////
+;TODO: Check if CT and Launcher is downloaded
 MainScriptBranch := "main" ;[TODO] Brach control
 ;MainScript
-global MainScriptVersion := ReadVersionFromAhkFile("Version",MainScriptAhkFile)
-global NewMainScriptVersion := GetNewVersionFromGithub(MainScriptBranch,"/Version/CoffeePoweredAutomationToolsVersion.txt")
-if(MainScriptVersion != "")
+if(FileExist(MainScriptAhkFile))
 {
-    if(NewMainScriptVersion != "ERROR")
+    global MainScriptVersion := ReadVersionFromAhkFile("Version",MainScriptAhkFile)
+    global NewMainScriptVersion := GetNewVersionFromGithub(MainScriptBranch,"/Version/CoffeePoweredAutomationToolsVersion.txt")
+    if(MainScriptVersion != "")
     {
-        if(NewMainScriptVersion > MainScriptVersion)
+        if(NewMainScriptVersion != "ERROR")
         {
-            ScriptUpdate := true
+            if(NewMainScriptVersion > MainScriptVersion)
+            {
+                ScriptUpdate := true
+            }
         }
     }
+}
+else
+{
+    ScriptDownload := true
 }
 ;Launcher
-global LauncherVersion := ReadVersionFromAhkFile("LauncherVersion",LauncherAhkFile)
-global NewLauncherVersion := GetNewVersionFromGithub(MainScriptBranch,"/Version/LauncherVersion.txt")
-if(LauncherVersion != "")
+if(FileExist(LauncherAhkFile))
 {
-    if(NewLauncherVersion != "ERROR")
+    global LauncherVersion := ReadVersionFromAhkFile("LauncherVersion",LauncherAhkFile)
+    global NewLauncherVersion := GetNewVersionFromGithub(MainScriptBranch,"/Version/LauncherVersion.txt")
+    if(LauncherVersion != "")
     {
-        if(NewLauncherVersion > LauncherVersion)
+        if(NewLauncherVersion != "ERROR")
         {
-            LauncherUpdate := true
+            if(NewLauncherVersion > LauncherVersion)
+            {
+                LauncherUpdate := true
+            }
         }
     }
 }
+else
+{
+    LauncherDownload := true
+}
+
 
 ;//////////////[Check for plugin updates]///////////////
 ;[TODO] Check for auto update
@@ -141,7 +161,12 @@ if(LauncherUpdate)
     LauncherUpdate := AskToDownloadUpdates("Launcher",LauncherVersion,NewLauncherVersion)
 
 
-
+;Downoad Files
+;TODO: error handling and ask to download
+if(ScriptDownload)
+    Download(GithubReposityLink . MainScriptBranch . "/CoffeeTools.ahk" ,MainScriptAhkFile)
+if(LauncherDownload)
+    Download(GithubReposityLink . MainScriptBranch . "/Launcher.ahk" ,LauncherAhkFile)
 ;Update Files
 UpdateMainFiles(MainScriptBranch)
 
@@ -289,8 +314,6 @@ RedownloadAssets()
     ;Delete old assets
     if(FileExist(RandomCoffeeQuotesFile))
         FileDelete(RandomCoffeeQuotesFile)
-    if(FileExist(LauncherAhkFile))
-        FileDelete(LauncherAhkFile)
     ;Download Assets
     SetProgressBarText("Downloading assets")
     SetProgressBarState(50)
@@ -303,8 +326,6 @@ DownloadAssets()
 {
     if(!FileExist(RandomCoffeeQuotesFile))
         Download(GithubReposityLink . MainScriptBranch . "/Other/texts/RandomCoffeeQuotes.txt",RandomCoffeeQuotesFile)
-    if(!FileExist(LauncherAhkFile))
-        Download(GithubReposityLink . MainScriptBranch . "/Launcher.ahk" ,LauncherAhkFile)
     SetProgressBarState(100)
 }
 ;____________________________________________________________
