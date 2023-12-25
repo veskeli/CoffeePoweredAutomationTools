@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.344"
+Version := "0.345"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -581,7 +581,7 @@ UninstallScript(*)
     ;Get file count
     local l_int_MaxFileCount := 6
     local l_int_FileCountInFolder := 0
-    loop files "*.*"
+    loop files, "*.*", "D"
     {
         l_int_FileCountInFolder := l_int_FileCountInFolder + 1
     }
@@ -771,7 +771,13 @@ OpenPluginSettings(PluginName,*)
     PluginSettingsGui.SetFont("s12")
     PluginSettingsGui.Add("Text", "x8 y0 w228 h23 +0x200", PluginName)
     PluginSettingsGui.SetFont("s9")
-    PluginSettingsCheckBox1 := PluginSettingsGui.Add("CheckBox", "x8 y24 w142 h23 +Disabled +Checked", "Check Updates on startup")
+    
+    ;Check updates on startup
+    PluginSettingsCheckBox1 := PluginSettingsGui.Add("CheckBox", "x8 y24 w142 h23 +Checked", "Check Updates on startup")
+    PluginSettingsCheckBox1.OnEvent("Click",SetPlugiCheckUpdatesOnStart.Bind(PluginName))
+    if(IniRead(AppSettingsIni,"Plugins",PluginName,0) == 0)
+        PluginSettingsCheckBox1.Value := 0
+
     PluginSettingsogcButtonCheckForUpdates := PluginSettingsGui.Add("Button", "x8 y72 w103 h23", "Check For Updates")
     PluginSettingsogcButtonCheckForUpdates.OnEvent("Click",CheckForPluginUpdates.Bind(PluginName))
     PluginSettingsogcButtonOpenFilelocation := PluginSettingsGui.Add("Button", "x8 y48 w102 h23", "Open File location")
@@ -783,6 +789,10 @@ OpenPluginSettings(PluginName,*)
     PluginSettingsGui.Show("w238 h101")
 
     IsPluginSettingsOpen := true
+}
+SetPlugiCheckUpdatesOnStart(PluginName,obj,*)
+{
+    IniWrite(obj.Value,AppSettingsIni,"Plugins",PluginName)
 }
 ClosePluginSettings(*)
 {
@@ -868,6 +878,7 @@ DownloadPlugin(PluginName,SettingsObj,obj,*)
     }
     else
     {
+        ;warn dev and alpha states
         if(InStr(WholePluginName,"Dev") or InStr(WholePluginName,"Alpha"))
         {
             local alertResult := MsgBox("The chosen plugin is in an alpha/dev state, and it may be unreliable or potentially disrupt the script.`nYou can run the script without plugins and remove any that cause issues.`nContinue anyways?","Plugin Caution: Alpha/Dev State Advisory","YesNo")
@@ -875,6 +886,7 @@ DownloadPlugin(PluginName,SettingsObj,obj,*)
                 return
         }
 
+        ;Download
         obj.Enabled := false
         obj.Text := "Downloading..."
 
@@ -883,6 +895,9 @@ DownloadPlugin(PluginName,SettingsObj,obj,*)
         SettingsObj.Enabled := true
         obj.Enabled := true
         obj.Text := "Remove"
+
+        ;Set update on start enabled
+        IniWrite(1,AppSettingsIni,"Plugins",PluginName)
     }
 
     ;Fix starting tab
