@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.341"
+Version := "0.342"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -44,6 +44,7 @@ OtherScriptsTAB := false ;Set to true
 WindowsTAB := false ;Set to true
 ;//////////////[Links]///////////////
 GithubPage := "https://github.com/veskeli/CoffeePoweredAutomationTools"
+global GithubReposityLink := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools/"
 RawGithubPage := "https://raw.githubusercontent.com/veskeli/CoffeePoweredAutomationTools"
 PluginGithubLink := RawGithubPage "/" CurrentScriptBranch "/Plugins"
 AllPluginsFile := RawGithubPage "/" CurrentScriptBranch "/Plugins/AllPlugins.txt"
@@ -225,6 +226,7 @@ if(PluginsLoaded)
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Check Before Opening Script]///////////////
+CreateDefaultDirectories()
 ;Settings tab
 
 ;Starting Tab
@@ -347,15 +349,15 @@ OpenMainGui(A_ThisMenuItem, A_ThisMenuItemPos, MyMenu)
 ;//////////////[Home]///////////////
 RunIpConfig(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-RunWait(A_ComSpec " /k ipconfig")
+    RunWait(A_ComSpec " /k ipconfig")
 }
 OpenAppdataFolder(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-Run(A_AppData)
+    Run(A_AppData)
 }
 OpenStartupFolder(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-Run(A_Startup)
+    Run(A_Startup)
 }
 OpenSounds(A_GuiEvent, GuiCtrlObj, Info, *)
 {
@@ -391,8 +393,8 @@ ClearWindowsTempFolder(A_GuiEvent, GuiCtrlObj, Info, *)
 ;Admin
 RunAsThisAdmin(A_GuiEvent, GuiCtrlObj, Info, *)
 {
-Run("*RunAs " A_ScriptFullPath)
-ExitApp()
+    Run("*RunAs " A_ScriptFullPath)
+    ExitApp()
 }
 RunAsThisAdminCheckboxButton(A_GuiEvent, GuiCtrlObj, Info, *)
 {
@@ -480,15 +482,23 @@ RedownloadAssets(*)
 }
 SetStartingTab(*)
 {
-    local NewStartTab := ogcButtonStartTab.Value
+    try
+    {
+        local NewStartTab := ogcButtonStartTab.Value
 
-    if(PluginsLoaded)
-    {
-        IniWrite(NewStartTab,AppSettingsIni,"Settings","StartingTabWithPlugins")
+        if(PluginsLoaded)
+        {
+            IniWrite(NewStartTab,AppSettingsIni,"Settings","StartingTabWithPlugins")
+        }
+        else
+        {
+            IniWrite(NewStartTab,AppSettingsIni,"Settings","StartingTab")
+        }
     }
-    else
+    catch
     {
-        IniWrite(NewStartTab,AppSettingsIni,"Settings","StartingTab")
+        ;TODO: Better error
+        msgbox("Can't write settings. Restarting the script may fix this issue.","Something went wrong!")
     }
 }
 RunWithPlugins(A_GuiEvent, GuiCtrlObj, Info, *)
@@ -602,33 +612,6 @@ UpdateTrayicon()
         Tray.Default := "Show GUI"
         ;Tray.Tip(ScriptName)
 }
-NotAdminError(T_CustomMessage := "")
-{
-    if(T_CustomMessage != "")
-    {
-        if(!A_IsAdmin)
-        {
-            msgResult := MsgBox(T_CustomMessage "`nPress `"Ok`" to run this script as admin", "Needs admin privileges", 1)
-            if (msgResult = "ok")
-            {
-                Run("*RunAs " A_ScriptFullPath)
-                ExitApp()
-            }
-        }
-    }
-    Else
-    {
-        if(!A_IsAdmin)
-        {
-            msgResult := MsgBox("This feature needs admin privileges`nPress `"Ok`" to run this script as admin", "Needs admin privileges", 1)
-            if (msgResult = "ok")
-            {
-                Run("*RunAs " A_ScriptFullPath)
-                ExitApp()
-            }
-        }
-    }
-}
 /**
  * @param SkipRunningLatestMessage Skip Running Latest Message
 **/
@@ -654,17 +637,13 @@ GetRandomCoffeeFact()
     {
         Facts := Fileread(RandomCoffeeQuotesFile)
         myArray := StrSplit(Facts, "`n")
-        randomElement := myArray[GetRandomInRange(1, myArray.Length)]
+        randomElement := myArray[Random(1, myArray.Length)]
         Return randomElement
     }
     Else
     {
         Return
     }
-}
-GetRandomInRange(min, max) {
-	out := Random(min, max)
-	return out
 }
 CreateDefaultDirectories()
 {
@@ -742,7 +721,8 @@ OpenPluginSettings(PluginName,*)
     PluginSettingsGui.Add("Text", "x8 y0 w228 h23 +0x200", PluginName)
     PluginSettingsGui.SetFont("s9")
     PluginSettingsCheckBox1 := PluginSettingsGui.Add("CheckBox", "x8 y24 w142 h23 +Disabled +Checked", "Check Updates on startup")
-    PluginSettingsogcButtonCheckForUpdates := PluginSettingsGui.Add("Button", "x8 y72 w103 h23 +Disabled", "Check For Updates")
+    PluginSettingsogcButtonCheckForUpdates := PluginSettingsGui.Add("Button", "x8 y72 w103 h23", "Check For Updates")
+    PluginSettingsogcButtonCheckForUpdates.OnEvent("Click",CheckForPluginUpdates.Bind(PluginName))
     PluginSettingsogcButtonOpenFilelocation := PluginSettingsGui.Add("Button", "x8 y48 w102 h23", "Open File location")
     PluginSettingsogcButtonOpenFilelocation.OnEvent("Click",OpenPluginLocation.Bind(PluginName))
     PluginSettingsogcButtonCancel := PluginSettingsGui.Add("Button", "x152 y72 w80 h23", "Cancel")
@@ -762,6 +742,27 @@ OpenPluginLocation(PluginName,*)
 {
     Run(AppPluginsFolder)
 }
+CheckForPluginUpdates(func_PluginName,*)
+{
+    local l_file_FileName := func_PluginName ".ahk"
+
+    local l_float_OldPluginVersion := ReadVersionFromAhkFile(func_PluginName "Version",AppPluginsFolder "\" l_file_FileName)
+    local l_float_NewPluginVersion := GetNewVersionFromGithub(CurrentScriptBranch,"/Version/" func_PluginName ".txt")
+    
+    if(l_float_OldPluginVersion < l_float_NewPluginVersion)
+    {
+        local l_srt_Prompt := MsgBox("Old: " l_float_OldPluginVersion " New: " l_float_NewPluginVersion,"PluginUpdate","YesNo")
+        if(l_srt_Prompt == "Yes")
+        {
+            ;TODO: Update Plugin
+            MsgBox("Not implemented yet! Restart app to update plugins.","Feature missing")
+        }
+    }
+    else
+    {
+        MsgBox("Already running latest version. (" l_float_OldPluginVersion ")","Latest")
+    }
+}
 /**
  * Create plugin line
  * * Used in GetAllPlugins()
@@ -774,13 +775,16 @@ AddNewPlugin(PluginName)
     FixedPluginName := StrSplit(PluginName,A_Space)
 
     PluginManagerGui.Add("Text", "x8 y" CorrectY " w207 h23 +0x200", PluginName)
-    ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y" CorrectY " w80 h23", "Settings")
+    ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y" CorrectY " w80 h23 +Disabled", "Settings")
     ogcButtonInstall := PluginManagerGui.Add("Button", "x312 y" CorrectY " w80 h23", "Install")
-    ogcButtonInstall.OnEvent("Click", DownloadPlugin.Bind(PluginName))
+    ogcButtonInstall.OnEvent("Click", DownloadPlugin.Bind(PluginName,ogcButtonSettings))
 
     destination := AppPluginsFolder "/" FixedPluginName[1] ".ahk"
     if(FileExist(destination))
+    {
+        ogcButtonSettings.Enabled := true
         ogcButtonInstall.Text := "Remove"
+    }
 
     ;Settings
     ogcButtonSettings.OnEvent("Click", OpenPluginSettings.Bind(FixedPluginName[1]))
@@ -790,7 +794,7 @@ AddNewPlugin(PluginName)
 /**
  * @param PluginName Downloads this plugin if found
 **/
-DownloadPlugin(PluginName,obj,*)
+DownloadPlugin(PluginName,SettingsObj,obj,*)
 {
     FixedPluginName := StrSplit(PluginName,A_Space)
     local WholePluginName := PluginName
@@ -800,6 +804,7 @@ DownloadPlugin(PluginName,obj,*)
 
     if(FileExist(destination))
     {
+        SettingsObj.Enabled := false
         obj.Enabled := false
         obj.Text := "Deleting..."
 
@@ -822,6 +827,7 @@ DownloadPlugin(PluginName,obj,*)
 
         Download(url,destination)
 
+        SettingsObj.Enabled := true
         obj.Enabled := true
         obj.Text := "Remove"
     }
@@ -861,4 +867,145 @@ HomeScreenCategory(CategoryName,CategoryPosition := 0)
         default:
             MsgBox("Name Not Found!")
     }
+}
+;________________________________________________________________________________________________________________________
+;________________________________________________________________________________________________________________________
+;//////////////[Custom Error handling]///////////////
+NotAdminError(T_CustomMessage := "")
+{
+    if(T_CustomMessage != "")
+    {
+        if(!A_IsAdmin)
+        {
+            msgResult := MsgBox(T_CustomMessage "`nPress `"Ok`" to run this script as admin", "Needs admin privileges", 1)
+            if (msgResult = "ok")
+            {
+                Run("*RunAs " A_ScriptFullPath)
+                ExitApp()
+            }
+        }
+    }
+    Else
+    {
+        if(!A_IsAdmin)
+        {
+            msgResult := MsgBox("This feature needs admin privileges`nPress `"Ok`" to run this script as admin", "Needs admin privileges", 1)
+            if (msgResult = "ok")
+            {
+                Run("*RunAs " A_ScriptFullPath)
+                ExitApp()
+            }
+        }
+    }
+}
+;________________________________________________________________________________________________________________________
+;________________________________________________________________________________________________________________________
+;//////////////[Inherited from updater without using include]///////////////
+/**
+ * Github Reposity link setup
+ *
+ * Returns 'ERROR' if not found
+ *
+ * @param T_Branch Branch Name
+ * @param linkEnd File name (Path to file). Add "/" To Start
+ *
+ * Link: GithubReposityLink + T_Branch + linkEnd
+ *
+ * Link Example: [https://raw.githubusercontent.com/ USERNAME / REPOSITYNAME /] + [main] + [/version.txt]
+ * v1
+**/
+GetNewVersionFromGithub(T_Branch,linkEnd)
+{
+    ;Build link
+    VersionLink := GithubReposityLink . T_Branch . linkEnd
+    ;Get Version Text
+    T_NewVersion := ReadFileFromLink(VersionLink)
+    if(T_NewVersion == "ERROR")
+    {
+        ;msgbox,,No Internet Connection!,No Internet Connection!
+        return "ERROR"
+    }
+    ;Check that not empty or not found
+    if(T_NewVersion != "" and T_NewVersion != "404: Not Found" and T_NewVersion != "500: Internal Server Error" and T_NewVersion != "400: Invalid request")
+    {
+        Return T_NewVersion
+    }
+    else
+    {
+        return "ERROR"
+    }
+}
+/**
+ * Returns version found (Empty if not found)
+ *
+ * @param VersionVariableName Is case sensitive
+ * @param AhkFile Path to Ahk File
+ * v1
+**/
+ReadVersionFromAhkFile(VersionVariableName,AhkFile)
+{
+    ;Variables
+    VersionFile := FileRead(AhkFile)
+    FoundVersion := ""
+
+    loop parse, VersionFile, "`n" ;Loop lines
+    {
+        if(InStr(A_LoopField,VersionVariableName,1)) ;If contains variable name
+        {
+            FoundVersion := ParseVersionLine(A_LoopField)
+            break
+        }
+    }
+    return FoundVersion
+}
+/**
+ * Parses ahk variable
+ * v1
+**/
+ParseVersionLine(Line)
+{
+    ReturnFoundVersion := ""
+    VarStart := false
+    VarEnd := false
+    loop parse, Line ;Loop line characters
+    {
+        if(InStr(A_LoopField,'"')) ;Find "
+        {
+            if(VarStart) ;End "
+            {
+                VarEnd := true
+                break
+            }
+            else ;Start saving after "
+            {
+                VarStart := true
+                continue
+            }
+        }
+        else if(VarStart) ;Save characters to variable
+        {
+            ReturnFoundVersion := ReturnFoundVersion A_LoopField
+        }
+    }
+    return ReturnFoundVersion
+}
+/**
+ * @param Link Link to text file
+ * v1
+**/
+ReadFileFromLink(Link)
+{
+    try
+    {
+        whr := ComObject("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", Link, False)
+        whr.Send()
+        whr.WaitForResponse()
+        TResponse := whr.ResponseText
+    }
+    Catch Error as T_Error
+    {
+        return "ERROR"
+    }
+    return TResponse
 }
