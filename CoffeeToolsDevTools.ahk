@@ -1,6 +1,6 @@
 #Requires Autohotkey v2
 #SingleInstance Force
-BuildVersion := "Build 5"
+BuildVersion := "Build 6"
 
 ;vars
 global AppFolder := A_ScriptDir
@@ -147,13 +147,16 @@ UpdateAhkVersion(*)
         local VersionText := SelectedVersionText
         local NewVersionText := SelectedVersionText Edit1.Text '"'
 
+        local ChangeStartOnlyOnce := true
+
         ;Copy and save new version
         loop parse, MainFile, "`n"
         {
-            if(InStr(A_LoopField,VersionText))
+            if(InStr(A_LoopField,VersionText) and ChangeStartOnlyOnce)
             {
                 MainFileEnd := NewVersionText
                 SaveToStart := false
+                ChangeStartOnlyOnce := false
                 continue
             }
             else
@@ -366,13 +369,16 @@ UpdatePluginAhkVersion(*)
         local VersionText := SelectedVersionText
         local NewVersionText := SelectedVersionText PlugEdit1.Text '"'
 
+        local ChangeStartOnlyOnce := true
+
         ;Copy and save new version
         loop parse, MainFile, "`n"
         {
-            if(InStr(A_LoopField,VersionText))
+            if(InStr(A_LoopField,VersionText) and ChangeStartOnlyOnce)
             {
                 MainFileEnd := NewVersionText
                 SaveToStart := false
+                ChangeStartOnlyOnce := false
                 continue
             }
             else
