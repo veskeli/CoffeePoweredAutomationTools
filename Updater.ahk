@@ -6,7 +6,7 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Updater]///////////////
-UpdaterVersion := "0.541"
+UpdaterVersion := "0.542"
 global UpdaterVersion
 ;Braches [main] [Experimental] [PreRelease]
 ProgressBarVisible := False
@@ -393,12 +393,19 @@ StartProgressBar(CustomSteps := 0)
         if(UserCanceledUpdate or SkipRunningLatestMessage)
             return
         NewUpdaterVersion := GetNewVersionFromGithub(MainScriptBranch,"/Version/UpdaterVersion.txt")
-        ;[TODO] Better msg
-        DetailedMessage := ""
-        DetailedMessage := DetailedMessage "`nMain Script version: " MainScriptVersion " Newest: " NewMainScriptVersion
-        DetailedMessage := DetailedMessage "`nLauncher version: " LauncherVersion " Newest: " NewLauncherVersion
-        DetailedMessage := DetailedMessage "`nUpdater version: " UpdaterVersion " Newest: " NewUpdaterVersion
-        MsgBox("No updates found!`n`nDetailed:" DetailedMessage,"No updates found!")
+        try
+        {
+            ;[TODO] Better msg
+            DetailedMessage := ""
+            DetailedMessage := DetailedMessage "`nMain Script version: " MainScriptVersion " Newest: " NewMainScriptVersion
+            DetailedMessage := DetailedMessage "`nLauncher version: " LauncherVersion " Newest: " NewLauncherVersion
+            DetailedMessage := DetailedMessage "`nUpdater version: " UpdaterVersion " Newest: " NewUpdaterVersion
+            MsgBox("No updates found!`n`nDetailed:" DetailedMessage,"No updates found!")
+        }
+        catch
+        {
+            MsgBox("No updates found!","No updates found!")
+        }
     }
 }
 /**
