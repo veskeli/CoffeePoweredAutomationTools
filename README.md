@@ -3,6 +3,7 @@
 > Links and text may not be correct!
 # Coffee Powered Automation Tools
 ##### CoffeeTools
+![AhkVersion](https://img.shields.io/badge/AHK-2.0+-green)
 ![State](https://img.shields.io/badge/State-Alpha-red)
 - - -
 >[!IMPORTANT]
