@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.3483"
+Version := "0.34831"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -95,7 +95,7 @@ if(FileExist(AppSettingsIni))
         if(PluginLoadError or PluginLoadError == 1)
         {
             MsgBox("Plugin load failed. reinstalling plugins may fix this issue")
-            IniWrite(1,AppSettingsIni,"Error","PluginLoad")
+            IniWrite(0,AppSettingsIni,"Error","PluginLoad")
         }
         else
         {
