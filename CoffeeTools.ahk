@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.348"
+Version := "0.3481"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -29,6 +29,7 @@ AppUpdaterFile := AppFolder . "\Updater.ahk"
 AppUpdaterSettingsFile := AppFolder . "\UpdaterInfo.ini"
 LauncherAhkFile := AppFolder . "\Launcher.ahk"
 MainScriptAhkFile := AppFolder . "\" . ScriptName . ".ahk"
+MainScriptAhkFileWithPlugins := AppFolder . "\" . ScriptName . "WithPlugins.ahk"
 ;//////////////[Variables]///////////////
 VersionTitle := "Plugin Support"
 CurrentScriptBranch := "main"
@@ -252,6 +253,9 @@ catch
     ;Currently Load normal and show error
     CreateDefaultDirectories()
     IniWrite(1,AppSettingsIni,"Error","PluginLoad")
+    IniWrite(0,AppSettingsIni,"PluginLoader","RunOnStart")
+    if(FileExist(MainScriptAhkFileWithPlugins))
+        FileDelete(MainScriptAhkFileWithPlugins)
     Run(A_ScriptFullPath)
     ExitApp
 }
@@ -545,6 +549,11 @@ RunWithPlugins(*)
 {
     if(PluginsLoaded)
     {
+        if(ogcButtonRunAlwaysWithPlugins.Value == 1)
+        {
+            MsgBox('Disable "Run always with plugins" To run without plugins')
+            return
+        }
         Run(MainScriptAhkFile)
         ExitApp
     }
