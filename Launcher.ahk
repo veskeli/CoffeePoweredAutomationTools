@@ -57,6 +57,7 @@ if(IsEmpty)
     goto RunDefault
 }
 ;Check for loaded plugins
+;TODO: Enable faster start (dont build every time)
 if(FileExist(LoadedPluginsFile) && True == False)
 {
     TextFile := FileRead(LoadedPluginsFile)
