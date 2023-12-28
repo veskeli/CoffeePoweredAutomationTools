@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.3482"
+Version := "0.3483"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -95,6 +95,7 @@ if(FileExist(AppSettingsIni))
         if(PluginLoadError or PluginLoadError == 1)
         {
             MsgBox("Plugin load failed. reinstalling plugins may fix this issue")
+            IniWrite(1,AppSettingsIni,"Error","PluginLoad")
         }
         else
         {
@@ -949,6 +950,17 @@ DownloadPlugin(PluginName,SettingsObj,obj,*)
 
         ;Set update on start enabled
         IniWrite(1,AppSettingsIni,"Plugins",PluginName)
+
+        ;Ask to restart if plugins loaded
+        if(PluginsLoaded)
+        {
+            askRestart := MsgBox("Do you want to restart the application in order to load the newly added plugins?","Restart for New Plugins?","YesNo")
+            if(askRestart == "Yes")
+            {
+                Run(A_ScriptFullPath)
+                ExitApp
+            }
+        }
     }
 
     ;Fix starting tab
