@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.3481"
+Version := "0.3482"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -256,7 +256,7 @@ catch
     IniWrite(0,AppSettingsIni,"PluginLoader","RunOnStart")
     if(FileExist(MainScriptAhkFileWithPlugins))
         FileDelete(MainScriptAhkFileWithPlugins)
-    Run(A_ScriptFullPath)
+    Run(MainScriptAhkFile)
     ExitApp
 }
 }
