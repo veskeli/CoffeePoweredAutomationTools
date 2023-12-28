@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.34832"
+Version := "0.34833"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -546,9 +546,22 @@ SetStartingTab(*)
         msgbox("Can't write settings. Restarting the script may fix this issue.","Something went wrong!")
     }
 }
-RunWithPlugins(ForceStartWithPlugins := false,*)
+RunWithPluginsForce(*)
 {
-    if(PluginsLoaded and !ForceStartWithPlugins)
+    if(FileExist(LauncherAhkFile))
+    {
+        Run(LauncherAhkFile)
+        ExitApp
+    }
+    else
+    {
+        ;TODO: Better msgbox
+        MsgBox("Launcher File Is Missing!")
+    }
+}
+RunWithPlugins(*)
+{
+    if(PluginsLoaded)
     {
         if(ogcButtonRunAlwaysWithPlugins.Value == 1)
         {
@@ -968,7 +981,7 @@ DownloadPlugin(PluginName,SettingsObj,obj,*)
         askRestart := MsgBox("Do you want to restart the application in order to load the newly changed plugins?","Restart for changed Plugins?","YesNo")
         if(askRestart == "Yes")
         {
-            RunWithPlugins(true)
+            RunWithPluginsForce()
             ExitApp
         }
     }
