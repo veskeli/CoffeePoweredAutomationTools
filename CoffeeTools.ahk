@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.346"
+Version := "0.347"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -37,6 +37,7 @@ global PluginsLoaded := false
 PluginsInManagerCount := 1
 global IsPluginSettingsOpen := false
 global PluginNameList := Array()
+global PluginLoadError := false
 ;//////////////[Tabs]///////////////
 HomeTAB := true
 SettingsTAB := true
@@ -68,9 +69,10 @@ global AppUpdaterFile
 global RandomCoffeeQuotesFile
 global CloseToTray
 ;____________________________________________________________
-;//////////////[Tab Control]///////////////
+;//////////////[Tab Control and plugin control]///////////////
 if(FileExist(AppSettingsIni))
 {
+    ;Check tabs
     T_HomeTab := IniRead(AppSettingsIni, "Tabs", "Home", "")
     T_SettingsTab := IniRead(AppSettingsIni, "Tabs", "Settings", "")
     T_OtherScriptsTab := IniRead(AppSettingsIni, "Tabs", "OtherScripts", "")
@@ -84,6 +86,20 @@ if(FileExist(AppSettingsIni))
         OtherScriptsTAB := false
     if(T_WindowsTab == "0")
         WindowsTAB := false
+    ;Check Plugins
+    LoadPluginsOnStart := IniRead(AppSettingsIni,"PluginLoader","RunOnStart",false)
+    PluginLoadError := IniRead(AppSettingsIni,"Error","PluginLoad",false)
+    if(PluginLoadError or PluginLoadError == 1)
+    {
+        MsgBox("Plugin load failed. reinstalling plugins may fix this issue")
+    }
+    else
+    {
+        if(LoadPluginsOnStart or LoadPluginsOnStart == 1)
+        {
+            RunWithPlugins()
+        }
+    }
 }
 myGui := Gui()
 myGui.OnEvent("Close", GuiClose)
@@ -179,7 +195,8 @@ if(SettingsTAB)
     ogcOnExitCloseToTrayCheckbox.OnEvent("Click", OnExitCloseToTray.Bind("Normal"))
     ogcButtonRedownloadassets := myGui.Add("Button", "x16 y180 w133 h28", "Redownload assets")
     ogcButtonRedownloadassets.OnEvent("Click", RedownloadAssets.Bind("Normal"))
-    ogcButtonRunAlwaysWithPlugins := myGui.Add("Checkbox", "x16 y210 w145 h23 +Disabled", "Run always with plugins")
+    ogcButtonRunAlwaysWithPlugins := myGui.Add("Checkbox", "x16 y210 w145 h23", "Run always with plugins")
+    ogcButtonRunAlwaysWithPlugins.OnEvent("Click",SetRunPluginsOnLoad.Bind())
     ogcButtonRunWithPlugins := myGui.Add("Button", "x16 y232 w133 h23", "Run with plugins")
     ogcButtonRunWithPlugins.OnEvent("Click",RunWithPlugins.Bind("Normal"))
     myGui.Add("Text", "x14 y264 w100 h23", "Start Tab:")
@@ -221,8 +238,20 @@ if(SettingsTAB)
 }
 if(PluginsLoaded)
 {
+try
+{
 ;<---Start_Include--->
 ;<---End_Include--->
+}
+catch
+{
+    ;TODO: Automatic repair
+    ;Currently Load normal and show error
+    CreateDefaultDirectories()
+    IniWrite(1,AppSettingsIni,"Error","PluginLoad")
+    Run(A_ScriptFullPath)
+    ExitApp
+}
 }
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
@@ -481,6 +510,11 @@ RedownloadAssets(*)
         MsgBox("Updater File Is Missing!")
     }
 }
+SetRunPluginsOnLoad(*)
+{
+    CreateDefaultDirectories()
+    IniWrite(ogcButtonRunAlwaysWithPlugins.Value,AppSettingsIni,"PluginLoader","RunOnStart")
+}
 SetStartingTab(*)
 {
     try
@@ -502,7 +536,7 @@ SetStartingTab(*)
         msgbox("Can't write settings. Restarting the script may fix this issue.","Something went wrong!")
     }
 }
-RunWithPlugins(A_GuiEvent, GuiCtrlObj, Info, *)
+RunWithPlugins(*)
 {
     if(PluginsLoaded)
     {
@@ -782,7 +816,7 @@ OpenPluginSettings(PluginName,*)
     PluginSettingsogcButtonCheckForUpdates.OnEvent("Click",CheckForPluginUpdates.Bind(PluginName))
     PluginSettingsogcButtonOpenFilelocation := PluginSettingsGui.Add("Button", "x8 y48 w102 h23", "Open File location")
     PluginSettingsogcButtonOpenFilelocation.OnEvent("Click",OpenPluginLocation.Bind(PluginName))
-    PluginSettingsogcButtonCancel := PluginSettingsGui.Add("Button", "x152 y72 w80 h23", "Cancel")
+    PluginSettingsogcButtonCancel := PluginSettingsGui.Add("Button", "x152 y72 w80 h23", "Close")
     PluginSettingsogcButtonCancel.OnEvent("Click",(*) => ClosePluginSettings())
     PluginSettingsGui.OnEvent('Close', (*) => ClosePluginSettings())
     PluginSettingsGui.Title := "Settings"
