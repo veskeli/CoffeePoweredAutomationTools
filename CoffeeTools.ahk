@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.347"
+Version := "0.348"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -89,15 +89,18 @@ if(FileExist(AppSettingsIni))
     ;Check Plugins
     LoadPluginsOnStart := IniRead(AppSettingsIni,"PluginLoader","RunOnStart",false)
     PluginLoadError := IniRead(AppSettingsIni,"Error","PluginLoad",false)
-    if(PluginLoadError or PluginLoadError == 1)
+    if(!PluginsLoaded)
     {
-        MsgBox("Plugin load failed. reinstalling plugins may fix this issue")
-    }
-    else
-    {
-        if(LoadPluginsOnStart or LoadPluginsOnStart == 1)
+        if(PluginLoadError or PluginLoadError == 1)
         {
-            RunWithPlugins()
+            MsgBox("Plugin load failed. reinstalling plugins may fix this issue")
+        }
+        else
+        {
+            if(LoadPluginsOnStart or LoadPluginsOnStart == 1)
+            {
+                RunWithPlugins()
+            }
         }
     }
 }
@@ -292,6 +295,8 @@ if(FileExist(AppSettingsIni))
             ExitApp()
         }
     }
+    ;Run plugins at start
+    ogcButtonRunAlwaysWithPlugins.Value := IniRead(AppSettingsIni,"PluginLoader","RunOnStart",0)
     ;Starting Tab
     if(PluginsLoaded)
     {
