@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.34831"
+Version := "0.34832"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -546,9 +546,9 @@ SetStartingTab(*)
         msgbox("Can't write settings. Restarting the script may fix this issue.","Something went wrong!")
     }
 }
-RunWithPlugins(*)
+RunWithPlugins(ForceStartWithPlugins := false,*)
 {
-    if(PluginsLoaded)
+    if(PluginsLoaded and !ForceStartWithPlugins)
     {
         if(ogcButtonRunAlwaysWithPlugins.Value == 1)
         {
@@ -950,17 +950,6 @@ DownloadPlugin(PluginName,SettingsObj,obj,*)
 
         ;Set update on start enabled
         IniWrite(1,AppSettingsIni,"Plugins",PluginName)
-
-        ;Ask to restart if plugins loaded
-        if(PluginsLoaded)
-        {
-            askRestart := MsgBox("Do you want to restart the application in order to load the newly added plugins?","Restart for New Plugins?","YesNo")
-            if(askRestart == "Yes")
-            {
-                Run(A_ScriptFullPath)
-                ExitApp
-            }
-        }
     }
 
     ;Fix starting tab
@@ -971,6 +960,16 @@ DownloadPlugin(PluginName,SettingsObj,obj,*)
         {
             IniWrite(2,AppSettingsIni,"Settings","StartingTabWithPlugins")
             MsgBox("Starting tab reset to settings.","Start Tab Reset")
+        }
+    }
+    ;Ask to restart if plugins loaded
+    if(PluginsLoaded)
+    {
+        askRestart := MsgBox("Do you want to restart the application in order to load the newly changed plugins?","Restart for changed Plugins?","YesNo")
+        if(askRestart == "Yes")
+        {
+            RunWithPlugins(true)
+            ExitApp
         }
     }
 }
