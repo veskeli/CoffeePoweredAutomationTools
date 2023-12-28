@@ -6,9 +6,9 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Launcher]///////////////
-LauncherVersion := "0.14"
+LauncherVersion := "0.141"
 
-
+;TODO: Add try and catch to whole script so if anything fails then load script without plugins
 
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -57,6 +57,7 @@ if(IsEmpty)
     goto RunDefault
 }
 ;Check for loaded plugins
+;TODO: Enable faster start (dont build every time)
 if(FileExist(LoadedPluginsFile) && True == False)
 {
     TextFile := FileRead(LoadedPluginsFile)
@@ -110,6 +111,7 @@ if(BuildApp)
             NewFile := NewFile . "`n" . "#Include " . AppPluginsFolder . "\" . plugin
         }
     }
+    NewFile := NewFile . "`n" . "#Warn All, Off"
     MainFile := FileRead(MainScriptAhkFile)
     ;Save Main Script Start And End
     MainFileStart := ""

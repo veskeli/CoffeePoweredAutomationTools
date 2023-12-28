@@ -6,9 +6,9 @@ SplitPath(A_ScriptName, , , , &GameScripts)
 Persistent
 ;____________________________________________________________
 ;//////////////[Launcher]///////////////
-LauncherVersion := "0.141"
+LauncherVersion := "0.142"
 
-
+;TODO: Add try and catch to whole script so if anything fails then load script without plugins
 
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -111,6 +111,7 @@ if(BuildApp)
             NewFile := NewFile . "`n" . "#Include " . AppPluginsFolder . "\" . plugin
         }
     }
+    NewFile := NewFile . "`n" . "#Warn All, Off"
     MainFile := FileRead(MainScriptAhkFile)
     ;Save Main Script Start And End
     MainFileStart := ""
