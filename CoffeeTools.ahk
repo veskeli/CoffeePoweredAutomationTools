@@ -16,7 +16,7 @@ Persistent
 ;________________________________________________________________________________________________________________________
 ;________________________________________________________________________________________________________________________
 ;//////////////[Coffee Tools]///////////////
-Version := "0.34833"
+Version := "0.35"
 VersionMode := "Alpha"
 ;//////////////[Folders]///////////////
 ScriptName := "CoffeeTools"
@@ -520,10 +520,16 @@ RedownloadAssets(*)
         MsgBox("Updater File Is Missing!")
     }
 }
-SetRunPluginsOnLoad(*)
+SetRunPluginsOnLoad(tValue,*)
 {
+    t_new_value := tValue.Value
     CreateDefaultDirectories()
-    IniWrite(ogcButtonRunAlwaysWithPlugins.Value,AppSettingsIni,"PluginLoader","RunOnStart")
+    IniWrite(t_new_value,AppSettingsIni,"PluginLoader","RunOnStart")
+    try
+    {
+        ogcButtonRunAlwaysWithPlugins.Value := t_new_value
+        ogcButtonRunAlwaysWithPlugins2.Value := t_new_value 
+    }
 }
 SetStartingTab(*)
 {
@@ -784,6 +790,13 @@ PluginManagerInt()
     global PluginManagerGui := Gui()
     PluginManagerGui.Add("Text", "x8 y8 w73 h23 +0x200", "Plugin name:")
     PluginManagerGui.Add("Text", "x8 y40 w395 h2 +0x10")
+    global ogcButtonRunAlwaysWithPlugins2 := PluginManagerGui.Add("Checkbox", "x170 y8 w142 h23", "Run always with plugins")
+    ogcButtonRunAlwaysWithPlugins2.OnEvent("Click",SetRunPluginsOnLoad.Bind())
+    ogcButtonRunAlwaysWithPlugins2.Value := ogcButtonRunAlwaysWithPlugins.Value
+    t_runWithPlugns := PluginManagerGui.Add("Button", "x312 y8 w120 h23", "Run with plugins")
+    t_runWithPlugns.OnEvent("Click",RunWithPlugins.Bind())
+    if(PluginsLoaded)
+        t_runWithPlugns.Text := "Run without plugins"
     ;Plugins here
     ;PluginManagerGui.Add("Text", "x8 y48 w207 h23 +0x200", "Plugin")
     ;ogcButtonSettings := PluginManagerGui.Add("Button", "x224 y48 w80 h23 +Disabled", "Settings")
